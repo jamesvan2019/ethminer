@@ -77,6 +77,7 @@ struct Solution
     WorkPackage work;                              // WorkPackage this solution refers to
     std::chrono::steady_clock::time_point tstamp;  // Timestamp of found solution
     unsigned midx;                                 // Originating miner Id
+    h256 hashResult; //hash result
 };
 
 }  // namespace eth
