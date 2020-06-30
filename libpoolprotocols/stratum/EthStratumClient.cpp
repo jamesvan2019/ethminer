@@ -4,6 +4,15 @@
 
 #include "EthStratumClient.h"
 
+#include <fstream> 
+#include <iostream>
+
+#include<stdio.h>
+#include<string.h>
+#include<errno.h>
+#include <stdlib.h>  /* exit() 函数 */
+int write_string_to_file_append(const std::string & file_string, const std::string str );
+string readFileIntoString(char * filename);
 #ifdef _WIN32
 // Needed for certificates validation on TLS connections
 #include <wincrypt.h>
@@ -1604,17 +1613,36 @@ void EthStratumClient::submitSolution(const Solution& solution)
     m_solution_submitted_max_id = max(m_solution_submitted_max_id, id);
     jReq["method"] = "mining.submit";
     jReq["params"] = Json::Value(Json::arrayValue);
-
+    std::string signContent;
+    char * signfile = (char*)"signature.bin";
+    FILE *fstream=NULL;//执行签名
     switch (m_conn->StratumMode())
     {
     case EthStratumClient::STRATUM:
 
+        
+        if(NULL==(fstream=popen("rm datain.txt","r")))
+        {
+            fprintf(stderr,"execute command failed: %s",strerror(errno));
+            break;
+        }
+        //记录nonce 和 mixhash
+        write_string_to_file_append("datain.txt",solution.mixHash.hex(HexPrefix::Add)+toHex(solution.nonce, HexPrefix::Add));
+        if(NULL==(fstream=popen("rm hash.bin ticket.bin signature.bin && tpm2_hash -H e -g 0x00B -I datain.txt -o hash.bin -t ticket.bin && tpm2_sign -k 0x81000005 -P RSAleaf123 -g 0x000B -m datain.txt -s signature.bin -t ticket.bin","r")))
+        {
+            fprintf(stderr,"execute command failed: %s",strerror(errno));
+            break;
+        }
+        pclose(fstream);
+
+        signContent = readFileIntoString(signfile);
         jReq["jsonrpc"] = "2.0";
         jReq["params"].append(m_conn->User());
         jReq["params"].append(solution.work.job);
         jReq["params"].append(toHex(solution.nonce, HexPrefix::Add));
         jReq["params"].append(solution.work.header.hex(HexPrefix::Add));
         jReq["params"].append(solution.mixHash.hex(HexPrefix::Add));
+        jReq["params"].append(toHex(signContent,2,HexPrefix::Add));
         if (!m_conn->Workername().empty())
             jReq["worker"] = m_conn->Workername();
 
@@ -1645,7 +1673,7 @@ void EthStratumClient::submitSolution(const Solution& solution)
         jReq["params"].append(
             toHex(solution.nonce, HexPrefix::DontAdd).substr(solution.work.exSizeBytes));
         jReq["params"].append(m_session->workerId);
-        break;        
+        break;      
     }
 
     enqueue_response_plea();
@@ -1922,4 +1950,27 @@ void EthStratumClient::clear_response_pleas()
     };
     m_response_plea_older.store(((steady_clock::time_point)steady_clock::now()).time_since_epoch(),
         std::memory_order_relaxed);
+}
+
+//从文件读入到string里
+string readFileIntoString(char * filename)
+{
+    ifstream ifile(filename);
+    //将文件读入到ostringstream对象buf中
+    ostringstream buf;
+    char ch;
+    while(buf&&ifile.get(ch))
+    buf.put(ch);
+    //返回与流对象buf关联的字符串
+    return buf.str();
+}
+
+
+int write_string_to_file_append(const std::string & file_string, const std::string str )
+{
+	std::ofstream OsWrite(file_string,std::ofstream::app);
+	OsWrite<<str;
+	OsWrite<<std::endl;
+	OsWrite.close();
+   return 0;
 }
