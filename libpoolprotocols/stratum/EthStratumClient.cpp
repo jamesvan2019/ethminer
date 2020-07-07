@@ -1655,10 +1655,9 @@ void EthStratumClient::submitSolution(const Solution& solution)
             fprintf(stderr,"execute command failed: %s",strerror(errno));
             break;
         }
-        std::string str = solution.mixHash.hex(HexPrefix::Add)+toHex(solution.nonce, HexPrefix::Add);
-        cout << "hash content : " << str << endl;
+        cout << "hash content : " << solution.mixHash.hex(HexPrefix::Add)+toHex(solution.nonce, HexPrefix::Add) << endl;
         //记录nonce 和 mixhash
-        write_string_to_file_append("datain.txt",str);
+        write_string_to_file_append("datain.txt",solution.mixHash.hex(HexPrefix::Add)+toHex(solution.nonce, HexPrefix::Add));
         if(NULL==(fstream=popen("rm -f hash.bin ticket.bin signature.bin && tpm2_hash -H e -g 0x00B -I datain.txt -o hash.bin -t ticket.bin && tpm2_sign -k 0x81000005 -P RSAleaf123 -g 0x000B -m datain.txt -s signature.bin -t ticket.bin","r")))
         {
             fprintf(stderr,"execute command failed: %s",strerror(errno));
