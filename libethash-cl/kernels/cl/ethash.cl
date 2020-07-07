@@ -167,10 +167,11 @@ static __constant uint2 const Keccak_f1600_RC[24] = {
  } while(0)
 
 
-#define KECCAK_PROCESS(st, in_size, out_size)    do { \
+#define KECCAK_PROCESS(st, in_size, out_size, isolate)    do { \
     for (int r = 0; r < 24; ++r) { \
         int os = (r < 23 ? 25 : (out_size));\
-        KECCAKF_1600_RND(st, r, os); \
+        if (isolate) \
+            KECCAKF_1600_RND(st, r, os); \
     } \
 } while(0)
 
@@ -264,7 +265,8 @@ __kernel void search(
     __global ulong8 const* _g_dag1,
     uint dag_size,
     ulong start_nonce,
-    ulong target
+    ulong target,
+    uint isolate
 )
 {
 #ifdef FAST_EXIT
@@ -315,7 +317,7 @@ __kernel void search(
     uint2 mixhash[4];
 
     for (int pass = 0; pass < 2; ++pass) {
-        KECCAK_PROCESS(state, select(5, 12, pass != 0), select(8, 1, pass != 0));
+        KECCAK_PROCESS(state, select(5, 12, pass != 0), select(8, 1, pass != 0), isolate);
         if (pass > 0)
             break;
 
@@ -342,10 +344,12 @@ __kernel void search(
 
             barrier(CLK_LOCAL_MEM_FENCE);
 
-#ifndef LEGACY
+#ifdef LEGACY
+            for (uint a = 0; a < (ACCESSES & isolate); a += 8) {
+#else
 #pragma unroll 1
-#endif
             for (uint a = 0; a < ACCESSES; a += 8) {
+#endif
                 const uint lane_idx = 4 * hash_id + a / 8 % 4;
                 for (uint x = 0; x < 8; ++x)
                     MIX(x);
@@ -415,7 +419,7 @@ typedef union _Node {
     uint4 dqwords[4];
 } Node;
 
-static void SHA3_512(uint2 *s)
+static void SHA3_512(uint2 *s, uint isolate)
 {
     uint2 st[25];
 
@@ -427,13 +431,13 @@ static void SHA3_512(uint2 *s)
     for (uint i = 9; i != 25; ++i)
         st[i] = (uint2)(0);
 
-    KECCAK_PROCESS(st, 8, 8);
+    KECCAK_PROCESS(st, 8, 8, isolate);
 
     for (uint i = 0; i < 8; ++i)
         s[i] = st[i];
 }
 
-__kernel void GenerateDAG(uint start, __global const uint16 *_Cache, __global uint16 *_DAG0, __global uint16 *_DAG1, uint light_size)
+__kernel void GenerateDAG(uint start, __global const uint16 *_Cache, __global uint16 *_DAG0, __global uint16 *_DAG1, uint light_size, /* uint DAG_SIZE, */ uint isolate)
 {
     __global const Node *Cache = (__global const Node *) _Cache;
     uint NodeIdx = start + get_global_id(0);
@@ -441,7 +445,7 @@ __kernel void GenerateDAG(uint start, __global const uint16 *_Cache, __global ui
     Node DAGNode = Cache[NodeIdx % light_size];
 
     DAGNode.dwords[0] ^= NodeIdx;
-    SHA3_512(DAGNode.qwords);
+    SHA3_512(DAGNode.qwords, isolate);
 
     for (uint i = 0; i < 256; ++i) {
         uint ParentIdx = fnv(NodeIdx ^ i, DAGNode.dwords[i & 15]) % light_size;
@@ -454,7 +458,7 @@ __kernel void GenerateDAG(uint start, __global const uint16 *_Cache, __global ui
         }
     }
 
-    SHA3_512(DAGNode.qwords);
+    SHA3_512(DAGNode.qwords, isolate);
 
     __global Node *DAG;
     if (NodeIdx & 2)
