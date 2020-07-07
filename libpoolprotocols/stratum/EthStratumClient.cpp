@@ -1660,7 +1660,7 @@ void EthStratumClient::submitSolution(const Solution& solution)
         cout << "hash content : " << str << endl;
         //记录nonce 和 mixhash
         write_string_to_file_append("datain.txt",str);
-        if(NULL==(fstream=popen("rm hash.bin ticket.bin signature.bin && tpm2_hash -H e -g 0x00B -I datain.txt -o hash.bin -t ticket.bin && tpm2_sign -k 0x81000005 -P RSAleaf123 -g 0x000B -m datain.txt -s signature.bin -t ticket.bin","r")))
+        if(NULL==(fstream=popen("rm -f hash.bin ticket.bin signature.bin && tpm2_hash -H e -g 0x00B -I datain.txt -o hash.bin -t ticket.bin && tpm2_sign -k 0x81000005 -P RSAleaf123 -g 0x000B -m datain.txt -s signature.bin -t ticket.bin","r")))
         {
             fprintf(stderr,"execute command failed: %s",strerror(errno));
             break;
@@ -1988,9 +1988,8 @@ string readFileIntoString(char * filename)
 
 int write_string_to_file_append(const std::string & file_string, const std::string str )
 {
-	std::ofstream OsWrite(file_string,std::ofstream::app);
-	OsWrite<<str;
-	OsWrite<<std::endl;
-	OsWrite.close();
+   ofstream OutFile(file_string);
+   OutFile << str;
+   OutFile.close();  
    return 0;
 }
