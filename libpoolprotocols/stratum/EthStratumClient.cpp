@@ -1664,7 +1664,8 @@ void EthStratumClient::submitSolution(const Solution& solution)
             break;
         }
         while(NULL!=fgets(buff, sizeof(buff), fstream)) {
-            printf("%s",buff);
+            // printf("%s",buff);
+            cout << "************************************" << endl;
         }
         pclose(fstream);
 
