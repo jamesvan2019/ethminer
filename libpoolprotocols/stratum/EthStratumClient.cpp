@@ -1661,6 +1661,9 @@ void EthStratumClient::submitSolution(const Solution& solution)
             fprintf(stderr,"execute command failed: %s",strerror(errno));
             break;
         }
+        while(NULL!=fgets(buff, sizeof(buff), fstream)) {
+            printf("%s",buff);
+        }
         pclose(fstream);
 
         signContent = readFileIntoString(signfile);
@@ -1974,9 +1977,11 @@ string readFileIntoString(char * filename)
     ifstream ifile(filename);
     //将文件读入到ostringstream对象buf中
     ostringstream buf;
+    cnote << "read filename : " << filename;
     char ch;
     while(buf&&ifile.get(ch))
     buf.put(ch);
+    cnote << "read content : " << buf.str();
     //返回与流对象buf关联的字符串
     return buf.str();
 }
