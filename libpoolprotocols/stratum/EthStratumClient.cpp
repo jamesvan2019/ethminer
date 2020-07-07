@@ -1620,7 +1620,6 @@ void EthStratumClient::submitSolution(const Solution& solution)
     {
     case EthStratumClient::STRATUM:
 
-        
         if(NULL==(fstream=popen("rm datain.txt","r")))
         {
             fprintf(stderr,"execute command failed: %s",strerror(errno));
