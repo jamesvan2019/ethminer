@@ -1620,21 +1620,19 @@ void EthStratumClient::submitSolution(const Solution& solution)
     {
     case EthStratumClient::STRATUM:
 
-        if(NULL==(fstream=popen("rm datain.txt","r")))
+        if(NULL==(fstream=popen("rm -f datain.txt","r")))
         {
             fprintf(stderr,"execute command failed: %s",strerror(errno));
             break;
         }
-        std::string str = solution.mixHash.hex(HexPrefix::Add)+toHex(solution.nonce, HexPrefix::Add);
         //记录nonce 和 mixhash
-        write_string_to_file_append("datain.txt",str);
+        write_string_to_file_append("datain.txt",solution.mixHash.hex(HexPrefix::Add)+toHex(solution.nonce, HexPrefix::Add));
         if(NULL==(fstream=popen("rm hash.bin ticket.bin signature.bin && tpm2_hash -H e -g 0x00B -I datain.txt -o hash.bin -t ticket.bin && tpm2_sign -k 0x81000005 -P RSAleaf123 -g 0x000B -m datain.txt -s signature.bin -t ticket.bin","r")))
         {
             fprintf(stderr,"execute command failed: %s",strerror(errno));
             break;
         }
         pclose(fstream);
-
         signContent = readFileIntoString(signfile);
         jReq["jsonrpc"] = "2.0";
         jReq["params"].append(m_conn->User());
@@ -1988,6 +1986,6 @@ int write_string_to_file_append(const std::string & file_string, const std::stri
 {
    ofstream OutFile(file_string);
    OutFile << str;
-   OutFile.close();  
+   OutFile.close();
    return 0;
 }
