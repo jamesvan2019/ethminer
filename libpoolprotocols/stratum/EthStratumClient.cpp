@@ -1648,11 +1648,11 @@ void EthStratumClient::submitSolution(const Solution& solution)
 
     case EthStratumClient::ETHPROXY:
 
-        if(NULL==(fstream=popen("rm datain.txt","r")))
-        {
-            fprintf(stderr,"execute command failed: %s",strerror(errno));
-            break;
-        }
+        // if(NULL==(fstream=popen("rm datain.txt","r")))
+        // {
+        //     fprintf(stderr,"execute command failed: %s",strerror(errno));
+        //     break;
+        // }
         cout << "hash content : " << solution.mixHash.hex(HexPrefix::Add)+toHex(solution.nonce, HexPrefix::Add) << endl;
         //记录nonce 和 mixhash
         write_string_to_file_append("datain.txt",solution.mixHash.hex(HexPrefix::Add)+toHex(solution.nonce, HexPrefix::Add));
@@ -1984,8 +1984,10 @@ string readFileIntoString(char * filename)
 
 int write_string_to_file_append(const std::string & file_string, const std::string str )
 {
-   ofstream OutFile(file_string);
-   OutFile << str;
-   OutFile.close();
-   return 0;
+    cnote << "write filename : " << file_string;
+    cnote << "write content : " << str;
+    ofstream OutFile(file_string);
+    OutFile << str;
+    OutFile.close();
+    return 0;
 }
