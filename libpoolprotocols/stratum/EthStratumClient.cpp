@@ -1616,6 +1616,8 @@ void EthStratumClient::submitSolution(const Solution& solution)
     std::string signContent;
     char * signfile = (char*)"signature.bin";
     FILE *fstream=NULL;//执行签名
+    char buff[1024];
+    memset(buff,0,sizeof(buff));
     switch (m_conn->StratumMode())
     {
     case EthStratumClient::STRATUM:
