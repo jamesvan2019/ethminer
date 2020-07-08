@@ -1990,7 +1990,7 @@ string readFileIntoString(char * filename)
     char ch;
     while(buf&&ifile.get(ch))
     buf.put(ch);
-    cnote << "read content : " << buf.str();
+    // cnote << "read content : " << buf.str();
     //返回与流对象buf关联的字符串
     return buf.str();
 }
