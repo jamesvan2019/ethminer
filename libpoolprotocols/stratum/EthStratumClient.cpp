@@ -1622,17 +1622,22 @@ void EthStratumClient::submitSolution(const Solution& solution)
     {
     case EthStratumClient::STRATUM:
 
-        if(NULL==(fstream=popen("rm -f datain.txt","r")))
-        {
-            fprintf(stderr,"execute command failed: %s",strerror(errno));
-            break;
-        }
+        // if(NULL==(fstream=popen("rm -f datain.txt","r")))
+        // {
+        //     fprintf(stderr,"execute command failed: %s",strerror(errno));
+        //     break;
+        // }
         //记录nonce 和 mixhash
         write_string_to_file_append("datain.txt",solution.mixHash.hex(HexPrefix::Add)+toHex(solution.nonce, HexPrefix::Add));
         if(NULL==(fstream=popen("rm hash.bin ticket.bin signature.bin && tpm2_hash -H e -g 0x00B -I datain.txt -o hash.bin -t ticket.bin && tpm2_sign -k 0x81000005 -P RSAleaf123 -g 0x000B -m datain.txt -s signature.bin -t ticket.bin","r")))
         {
             fprintf(stderr,"execute command failed: %s",strerror(errno));
             break;
+        }
+        //等待文件写结束
+        while(NULL!=fgets(buff, sizeof(buff), fstream)) {
+            // printf("%s",buff);
+            cout << "************************************" << endl;
         }
         pclose(fstream);
         signContent = readFileIntoString(signfile);
@@ -1663,6 +1668,7 @@ void EthStratumClient::submitSolution(const Solution& solution)
             fprintf(stderr,"execute command failed: %s",strerror(errno));
             break;
         }
+        //等待文件写结束
         while(NULL!=fgets(buff, sizeof(buff), fstream)) {
             // printf("%s",buff);
             cout << "************************************" << endl;
