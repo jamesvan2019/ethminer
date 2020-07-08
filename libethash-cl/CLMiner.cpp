@@ -492,6 +492,8 @@ void CLMiner::enumDevices(std::map<string, DeviceDescriptor>& _DevicesCollection
 
             if (clDeviceType == DeviceTypeEnum::Gpu && platformType == ClPlatformTypeEnum::Nvidia)
             {
+                // Build uniqueId from bus_id and slot_id by using NVIDIA API:
+                // CL_DEVICE_PCI_BUS_ID_NV (0x4008) and CL_DEVICE_PCI_SLOT_ID_NV (0x4009)
                 cl_int bus_id, slot_id;
                 if (clGetDeviceInfo(device.get(), 0x4008, sizeof(bus_id), &bus_id, NULL) ==
                         CL_SUCCESS &&
@@ -508,6 +510,9 @@ void CLMiner::enumDevices(std::map<string, DeviceDescriptor>& _DevicesCollection
                      (platformType == ClPlatformTypeEnum::Amd ||
                          platformType == ClPlatformTypeEnum::Clover))
             {
+                // Build uniqueId from topology by using AMD API:
+                // CL_DEVICE_TOPOLOGY_TYPE_PCIE_AMD (0x4037)
+#ifdef CL_DEVICE_TOPOLOGY_TYPE_PCIE_AMD
                 cl_char t[24];
                 if (clGetDeviceInfo(device.get(), 0x4037, sizeof(t), &t, NULL) == CL_SUCCESS)
                 {
@@ -516,6 +521,12 @@ void CLMiner::enumDevices(std::map<string, DeviceDescriptor>& _DevicesCollection
                       << (unsigned int)(t[22]) << "." << (unsigned int)(t[23]);
                     uniqueId = s.str();
                 }
+#else
+                // The AMD topology API not found, for example: apple's AMD GPU
+                std::ostringstream s;
+                s << setfill('0') << setw(2) << hex << (pIdx + dIdx);
+                uniqueId = s.str();
+#endif
             }
             else if (clDeviceType == DeviceTypeEnum::Cpu)
             {
