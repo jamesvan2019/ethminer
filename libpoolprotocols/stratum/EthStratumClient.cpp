@@ -2001,7 +2001,7 @@ int write_string_to_file_append(const std::string & file_string, const std::stri
     cnote << "write filename : " << file_string;
     cnote << "write content : " << str;
     ofstream OutFile(file_string);
-    OutFile << str;
+    OutFile << str << endl;
     OutFile.close();
     return 0;
 }
