@@ -307,7 +307,9 @@ public:
 #if ETH_ETHASHCL || ETH_ETHASHCUDA || ETH_ETHASH_CPU
 
         app.add_flag("--list-devices", m_shouldListDevices, "");
-
+        std::map<std::string, PowType> map = {{"ethash", PowType::Ethash}, {"progpow", PowType::ProgPOW}};
+        app.add_option("-W,--pow-type", m_powType,"pow settings")
+            ->transform(CLI::CheckedTransformer(map, CLI::ignore_case));
 #endif
 
 #if ETH_ETHASHCL
@@ -1029,6 +1031,7 @@ public:
                     "exits"
                  << endl
                  << "                        Must be combined with -G or -U or -X flags" << endl
+                 << "    -W,--pow-type       POW types {ethash,progpow}, Default is ethash" << endl
                  << "    -L,--dag-load-mode  INT[0 .. 1] Default = 0" << endl
                  << "                        Set DAG load mode. Can be one of:" << endl
                  << "                        0 Parallel load mode (each GPU independently)" << endl
@@ -1260,6 +1263,9 @@ private:
     MinerType m_minerType = MinerType::Mixed;
     OperationMode m_mode = OperationMode::None;
     bool m_shouldListDevices = false;
+
+    // Pow options
+    PowType m_powType = PowType::Ethash;
 
     FarmSettings m_FarmSettings;  // Operating settings for Farm
     PoolSettings m_PoolSettings;  // Operating settings for PoolManager

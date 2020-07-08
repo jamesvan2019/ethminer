@@ -55,6 +55,11 @@ enum class DeviceSubscriptionTypeEnum
     Cpu
 
 };
+enum class PowType
+{
+    Ethash,
+    ProgPOW
+};
 
 enum class MinerType
 {

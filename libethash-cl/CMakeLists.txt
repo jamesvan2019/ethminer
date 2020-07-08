@@ -15,9 +15,22 @@ add_custom_command(
 )
 add_custom_target(clbin2h_stable DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/ethash.h ${CMAKE_CURRENT_SOURCE_DIR}/cl/ethash.cl)
 
+add_custom_command(
+		OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/progpow.h
+		COMMAND ${CMAKE_COMMAND} ARGS
+		-DBIN2H_SOURCE_FILE="${CMAKE_CURRENT_SOURCE_DIR}/kernels/cl/progpow.cl"
+		-DBIN2H_VARIABLE_NAME=progpow_cl
+		-DBIN2H_HEADER_FILE="${CMAKE_CURRENT_BINARY_DIR}/progpow.h"
+		-P "${CMAKE_CURRENT_SOURCE_DIR}/bin2h.cmake"
+		COMMENT "Generating OpenCL ProgPow Kernel Byte Array"
+		DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/kernels/cl/progpow.cl
+)
+add_custom_target(clbin2h_progpow DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/progpow.h ${CMAKE_CURRENT_SOURCE_DIR}/cl/progpow.cl)
+
 set(SOURCES
 	CLMiner.h CLMiner.cpp
 	${CMAKE_CURRENT_BINARY_DIR}/ethash.h
+	${CMAKE_CURRENT_BINARY_DIR}/progpow.h
 )
 
 if(APPLE)

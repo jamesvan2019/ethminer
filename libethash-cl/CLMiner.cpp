@@ -10,6 +10,7 @@
 
 #include "CLMiner.h"
 #include "ethash.h"
+#include "progpow.h"
 
 using namespace dev;
 using namespace eth;
