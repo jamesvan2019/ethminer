@@ -751,7 +751,7 @@ public:
         signal(SIGTERM, MinerCLI::signalHandler);
 
         // Initialize Farm
-        new Farm(m_DevicesCollection, m_FarmSettings, m_CUSettings, m_CLSettings, m_CPSettings);
+        new Farm(m_DevicesCollection, m_FarmSettings, m_powType, m_CUSettings, m_CLSettings, m_CPSettings);
 
         // Run Miner
         doMiner();

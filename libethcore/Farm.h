@@ -69,7 +69,7 @@ public:
     unsigned tstart = 0, tstop = 0;
 
     Farm(std::map<std::string, DeviceDescriptor>& _DevicesCollection,
-        FarmSettings _settings, CUSettings _CUSettings, CLSettings _CLSettings,
+        FarmSettings _settings, PowType _powType, CUSettings _CUSettings, CLSettings _CLSettings,
         CPSettings _CPSettings);
 
     ~Farm();
@@ -273,6 +273,7 @@ private:
     MinerRestart m_onMinerRestart;
 
     FarmSettings m_Settings;  // Own Farm Settings
+    PowType m_powType;        // Pow Type passed to Miners instantiator separately with its settings
     CUSettings m_CUSettings;  // Cuda settings passed to CUDA Miner instantiator
     CLSettings m_CLSettings;  // OpenCL settings passed to CL Miner instantiator
     CPSettings m_CPSettings;  // CPU settings passed to CPU Miner instantiator

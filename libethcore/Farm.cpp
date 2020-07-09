@@ -37,8 +37,9 @@ namespace eth
 Farm* Farm::m_this = nullptr;
 
 Farm::Farm(std::map<std::string, DeviceDescriptor>& _DevicesCollection,
-    FarmSettings _settings, CUSettings _CUSettings, CLSettings _CLSettings, CPSettings _CPSettings)
+    FarmSettings _settings, PowType _powType, CUSettings _CUSettings, CLSettings _CLSettings, CPSettings _CPSettings)
   : m_Settings(std::move(_settings)),
+    m_powType(_powType),
     m_CUSettings(std::move(_CUSettings)),
     m_CLSettings(std::move(_CLSettings)),
     m_CPSettings(std::move(_CPSettings)),
@@ -276,7 +277,7 @@ bool Farm::start()
             {
                 minerTelemetry.prefix = "cl";
                 m_miners.push_back(std::shared_ptr<Miner>(
-                    new CLMiner(m_miners.size(), m_CLSettings, it->second)));
+                    new CLMiner(m_miners.size(), m_powType, m_CLSettings, it->second)));
             }
 #endif
 #if ETH_ETHASHCPU

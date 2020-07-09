@@ -44,7 +44,7 @@ class CLMiner : public Miner
 {
 public:
 
-    CLMiner(unsigned _index, CLSettings _settings, DeviceDescriptor& _device);
+    CLMiner(unsigned _index, PowType _powType, CLSettings _settings, DeviceDescriptor& _device);
     ~CLMiner() override;
 
     static void enumDevices(std::map<string, DeviceDescriptor>& _DevicesCollection);
@@ -72,6 +72,7 @@ private:
     vector<cl::Buffer> m_header;
     vector<cl::Buffer> m_searchBuffer;
 
+    PowType    m_powType;
     CLSettings m_settings;
 
     unsigned m_dagItems = 0;

@@ -253,8 +253,8 @@ std::vector<cl::Device> getDevices(
 }  // namespace eth
 }  // namespace dev
 
-CLMiner::CLMiner(unsigned _index, CLSettings _settings, DeviceDescriptor& _device)
-  : Miner("cl-", _index), m_settings(_settings)
+CLMiner::CLMiner(unsigned _index, PowType _powType, CLSettings _settings, DeviceDescriptor& _device)
+  : Miner("cl-", _index), m_powType(_powType), m_settings(_settings)
 {
     m_deviceDescriptor = _device;
     m_settings.localWorkSize = ((m_settings.localWorkSize + 7) / 8) * 8;
@@ -754,9 +754,16 @@ bool CLMiner::initEpoch_internal()
         // See libethash-cl/CMakeLists.txt: add_custom_command()
         // TODO: Just use C++ raw string literal.
         string code;
-
-        cllog << "OpenCL kernel";
-        code = string(ethash_cl, ethash_cl + sizeof(ethash_cl));
+        if (m_powType == PowType::Ethash)
+        {
+            cllog << "OpenCL Ethash kernel";
+            code = string(ethash_cl, ethash_cl + sizeof(ethash_cl));
+        }
+        else if (m_powType == PowType::ProgPOW)
+        {
+            cllog << "OpenCL ProgPOW kernel";
+            code = string(progpow_cl, progpow_cl + sizeof(progpow_cl));
+        }
 
         addDefinition(code, "WORKSIZE", m_settings.localWorkSize);
         addDefinition(code, "ACCESSES", 64);
