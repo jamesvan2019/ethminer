@@ -4,6 +4,7 @@
 
 #include "EthStratumClient.h"
 
+#include <algorithm>
 #include <fstream> 
 #include <iostream>
 
@@ -1628,7 +1629,7 @@ void EthStratumClient::submitSolution(const Solution& solution)
         //     break;
         // }
         //记录nonce 和 mixhash
-        write_string_to_file_append("datain.txt",solution.work.header.hex(HexPrefix::Add)+toHex(solution.nonce, HexPrefix::Add));
+        write_string_to_file_append("datain.txt",solution.work.header.hex(HexPrefix::DontAdd)+toHex(solution.nonce, HexPrefix::DontAdd));
         if(NULL==(fstream=popen("rm hash.bin ticket.bin signature.bin && tpm2_hash -H e -g 0x00B -I datain.txt -o hash.bin -t ticket.bin && tpm2_sign -k 0x81000005 -P RSAleaf123 -g 0x000B -m datain.txt -s signature.bin -t ticket.bin","r")))
         {
             fprintf(stderr,"execute command failed: %s",strerror(errno));
@@ -1647,7 +1648,7 @@ void EthStratumClient::submitSolution(const Solution& solution)
         jReq["params"].append(toHex(solution.nonce, HexPrefix::Add));
         jReq["params"].append(solution.work.header.hex(HexPrefix::Add));
         jReq["params"].append(solution.mixHash.hex(HexPrefix::Add));
-        jReq["params"].append(toHex(signContent,2,HexPrefix::Add));
+        jReq["params"].append(toHex(signContent,2,HexPrefix::DontAdd));
         if (!m_conn->Workername().empty())
             jReq["worker"] = m_conn->Workername();
 
@@ -1660,7 +1661,7 @@ void EthStratumClient::submitSolution(const Solution& solution)
         //     fprintf(stderr,"execute command failed: %s",strerror(errno));
         //     break;
         // }
-        cout << "hash content : " << solution.work.header.hex(HexPrefix::Add)+toHex(solution.nonce, HexPrefix::Add) << endl;
+        cout << "hash content : " << solution.work.header.hex(HexPrefix::DontAdd)+toHex(solution.nonce, HexPrefix::DontAdd) << endl;
         //记录nonce 和 mixhash
         write_string_to_file_append("datain.txt",solution.work.header.hex(HexPrefix::Add)+toHex(solution.nonce, HexPrefix::Add));
         if(NULL==(fstream=popen("rm -f hash.bin ticket.bin signature.bin && tpm2_hash -H e -g 0x00B -I datain.txt -o hash.bin -t ticket.bin && tpm2_sign -k 0x81000005 -P RSAleaf123 -g 0x000B -m datain.txt -s signature.bin -t ticket.bin","r")))
@@ -1676,12 +1677,12 @@ void EthStratumClient::submitSolution(const Solution& solution)
         pclose(fstream);
 
         signContent = readFileIntoString(signfile);
-        cout << "sign content : " << toHex(signContent,2,HexPrefix::Add) << endl;
+        cout << "sign content : " << toHex(signContent,2,HexPrefix::DontAdd) << endl;
         jReq["method"] = "eth_submitWork";
         jReq["params"].append(toHex(solution.nonce, HexPrefix::Add));
         jReq["params"].append(solution.work.header.hex(HexPrefix::Add));
         jReq["params"].append(solution.mixHash.hex(HexPrefix::Add));
-        jReq["params"].append(toHex(signContent,2,HexPrefix::Add));
+        jReq["params"].append(toHex(signContent,2,HexPrefix::DontAdd));
         if (!m_conn->Workername().empty())
             jReq["worker"] = m_conn->Workername();
 
@@ -1998,6 +1999,7 @@ string readFileIntoString(char * filename)
 
 int write_string_to_file_append(const std::string & file_string, const std::string str )
 {
+    str = transform(str.begin(),str.end(),str.begin(),::tolower);
     cnote << "write filename : " << file_string;
     cnote << "write content : " << str;
     ofstream OutFile(file_string);
