@@ -54,6 +54,15 @@ private:
 
 DEV_SIMPLE_EXCEPTION(BadHexCharacter);
 
+/// Base class for all RLP exceptions.
+struct RLPException: virtual Exception { RLPException(std::string _message = std::string()): Exception(_message) {} };
+#define DEV_SIMPLE_EXCEPTION_RLP(X) struct X: virtual RLPException { const char* what() const noexcept override { return #X; } }
+
+DEV_SIMPLE_EXCEPTION_RLP(BadCast);
+DEV_SIMPLE_EXCEPTION_RLP(BadRLP);
+DEV_SIMPLE_EXCEPTION_RLP(OversizeRLP);
+DEV_SIMPLE_EXCEPTION_RLP(UndersizeRLP);
+
 struct ExternalFunctionFailure : virtual Exception
 {
 public:

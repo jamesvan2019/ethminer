@@ -1,17 +1,22 @@
-//
-// Created by Alex Wu on 2020/7/9.
-//
-
-#include "CLMiner.h"
-#include <libprogpow/ProgPow.h>
 
 #ifndef ETHMINER_PROGPOWCLMINER_H
 #define ETHMINER_PROGPOWCLMINER_H
+
+#include "CLMiner.h"
+#include <libethcore/ProgPowAux.h>
+#include <libprogpow/ProgPow.h>
+
 
 namespace dev
 {
 namespace eth
 {
+
+enum CLKernelName {
+    Stable,
+    Experimental,
+};
+
 class ProgPowCLMiner : public CLMiner
 {
 public:
@@ -31,26 +36,24 @@ protected:
 private:
 
     void workLoop() override;
-    bool init(int epoch, uint64_t block_number, bool new_epoch, bool new_period);
+    //bool init(int epoch, uint64_t block_number, bool new_epoch, bool new_period);
 
-    vector<cl::Context> m_context;
-    vector<cl::CommandQueue> m_queue;
-    vector<cl::CommandQueue> m_abortqueue;
+    cl::Context m_context;
+    cl::CommandQueue m_queue;
     cl::Kernel m_searchKernel;
     cl::Kernel m_dagKernel;
-    cl::Device m_device;
+    cl::Buffer m_dag;
+    cl::Buffer m_light;
+    cl::Buffer m_header;
+    cl::Buffer m_searchBuffer;
+    unsigned m_globalWorkSize = 0;
+    unsigned m_workgroupSize = 0;
 
-    vector<cl::Buffer> m_dag;
-    vector<cl::Buffer> m_light;
-    vector<cl::Buffer> m_header;
-    vector<cl::Buffer> m_searchBuffer;
-
-    PowType    m_powType;
-    CLSettings m_settings;
-
-    unsigned m_dagItems = 0;
-    uint64_t m_lastNonce = 0;
-
+    static unsigned s_platformId;
+    static unsigned s_numInstances;
+    static unsigned s_threadsPerHash;
+    static CLKernelName s_clKernelName;
+    static vector<int> s_devices;
 
     /// The local work size for the search
     static unsigned s_workgroupSize;
