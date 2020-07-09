@@ -9,6 +9,7 @@
 #include <ethash/ethash.hpp>
 
 #include "CLMiner.h"
+#include "ProgPowCLMiner.h"
 #include "ethash.h"
 #include "progpow.h"
 
@@ -252,6 +253,21 @@ std::vector<cl::Device> getDevices(
 
 }  // namespace eth
 }  // namespace dev
+
+Miner* CLMinerFactory::GetCLMinerIntance(unsigned int _index, PowType _powType, CLSettings _settings, DeviceDescriptor &_device) {
+        Miner* miner = nullptr;
+        if (_powType == PowType::Ethash)
+        {
+            miner = new CLMiner(_index, _powType, _settings, _device);
+        }else if (_powType == PowType::ProgPOW)
+        {
+            miner = new ProgPowCLMiner(_index, _powType, _settings, _device);
+        }else
+        {
+            cllog << "Unrecognized Pow Type";
+        }
+        return miner;
+}
 
 CLMiner::CLMiner(unsigned _index, PowType _powType, CLSettings _settings, DeviceDescriptor& _device)
   : Miner("cl-", _index), m_powType(_powType), m_settings(_settings)
@@ -758,15 +774,24 @@ bool CLMiner::initEpoch_internal()
         {
             cllog << "OpenCL Ethash kernel";
             code = string(ethash_cl, ethash_cl + sizeof(ethash_cl));
+
+            // The Ethash Kernel Definitions
+            addDefinition(code, "WORKSIZE", m_settings.localWorkSize);
+            addDefinition(code, "ACCESSES", 64);
         }
         else if (m_powType == PowType::ProgPOW)
         {
             cllog << "OpenCL ProgPOW kernel";
             code = string(progpow_cl, progpow_cl + sizeof(progpow_cl));
+
+            // The ProgPOW Kernel Definitions
+            // addDefinition(code, "GROUP_SIZE", m_workgroupSize);
+            // addDefinition(code, "PROGPOW_DAG_BYTES", dagBytes);
+            // addDefinition(code, "PROGPOW_DAG_ELEMENTS", dagElms);
+            // addDefinition(code, "LIGHT_WORDS", lightWords);
         }
 
-        addDefinition(code, "WORKSIZE", m_settings.localWorkSize);
-        addDefinition(code, "ACCESSES", 64);
+        // shared Definition
         addDefinition(code, "MAX_OUTPUTS", c_maxSearchResults);
         addDefinition(code, "PLATFORM", m_deviceDescriptor.clPlatformId);
         addDefinition(code, "COMPUTE", computeCapability);

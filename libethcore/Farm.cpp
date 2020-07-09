@@ -277,7 +277,8 @@ bool Farm::start()
             {
                 minerTelemetry.prefix = "cl";
                 m_miners.push_back(std::shared_ptr<Miner>(
-                    new CLMiner(m_miners.size(), m_powType, m_CLSettings, it->second)));
+                    (new CLMinerFactory())->GetCLMinerIntance(
+                        m_miners.size(), m_powType, m_CLSettings, it->second)));
             }
 #endif
 #if ETH_ETHASHCPU

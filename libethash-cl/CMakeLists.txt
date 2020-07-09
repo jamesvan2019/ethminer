@@ -29,6 +29,7 @@ add_custom_target(clbin2h_progpow DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/progpow.h 
 
 set(SOURCES
 	CLMiner.h CLMiner.cpp
+	ProgPowCLMiner.h ProgPowCLMiner.cpp
 	${CMAKE_CURRENT_BINARY_DIR}/ethash.h
 	${CMAKE_CURRENT_BINARY_DIR}/progpow.h
 )

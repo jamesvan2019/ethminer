@@ -40,6 +40,12 @@ namespace dev
 {
 namespace eth
 {
+class CLMinerFactory
+{
+    public:
+        Miner* GetCLMinerIntance(unsigned _index, PowType _powType, CLSettings _settings, DeviceDescriptor& _device);
+};
+
 class CLMiner : public Miner
 {
 public:
