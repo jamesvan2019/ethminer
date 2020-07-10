@@ -32,14 +32,14 @@
 
 uint64_t ethash_get_datasize(uint64_t const block_number)
 {
-	assert(block_number / ETHASH_EPOCH_LENGTH < 2048);
-	return dag_sizes[block_number / ETHASH_EPOCH_LENGTH];
+	assert(block_number / LEGACY_ETHASH_EPOCH_LENGTH < 2048);
+	return dag_sizes[block_number / LEGACY_ETHASH_EPOCH_LENGTH];
 }
 
 uint64_t ethash_get_cachesize(uint64_t const block_number)
 {
-	assert(block_number / ETHASH_EPOCH_LENGTH < 2048);
-	return cache_sizes[block_number / ETHASH_EPOCH_LENGTH];
+	assert(block_number / LEGACY_ETHASH_EPOCH_LENGTH < 2048);
+	return cache_sizes[block_number / LEGACY_ETHASH_EPOCH_LENGTH];
 }
 
 // Follows Sergio's "STRICT MEMORY HARD HASHING FUNCTIONS" (2014)
@@ -62,7 +62,7 @@ bool static ethash_compute_cache_nodes(
 		SHA3_512(nodes[i].bytes, nodes[i - 1].bytes, 64);
 	}
 
-	for (uint32_t j = 0; j != ETHASH_CACHE_ROUNDS; j++) {
+	for (uint32_t j = 0; j != LEGACY_ETHASH_CACHE_ROUNDS; j++) {
 		for (uint32_t i = 0; i != num_nodes; i++) {
 			uint32_t const idx = nodes[i].words[0] % num_nodes;
 			node data;
@@ -99,7 +99,7 @@ void ethash_calculate_dag_item(
 	__m128i xmm3 = ret->xmm[3];
 #endif
 
-	for (uint32_t i = 0; i != ETHASH_DATASET_PARENTS; ++i) {
+	for (uint32_t i = 0; i != LEGACY_ETHASH_DATASET_PARENTS; ++i) {
 		uint32_t parent_index = fnv_hash(node_index ^ i, ret->words[i % NODE_WORDS]) % num_parent_nodes;
 		node const *parent = &cache_nodes[parent_index];
 
@@ -162,7 +162,7 @@ static bool ethash_hash(
 	unsigned const page_size = sizeof(uint32_t) * MIX_WORDS;
 	unsigned const num_full_pages = (unsigned) (full_size / page_size);
 
-	for (unsigned i = 0; i != ETHASH_ACCESSES; ++i) {
+	for (unsigned i = 0; i != LEGACY_ETHASH_ACCESSES; ++i) {
 		uint32_t const index = fnv_hash(s_mix->words[0] ^ i, mix->words[i % MIX_WORDS]) % num_full_pages;
 
 		for (unsigned n = 0; n != MIX_NODES; ++n) {
@@ -218,7 +218,7 @@ ethash_h256_t ethash_get_seedhash(uint64_t block_number)
 {
 	ethash_h256_t ret;
 	ethash_h256_reset(&ret);
-	uint64_t const epochs = block_number / ETHASH_EPOCH_LENGTH;
+	uint64_t const epochs = block_number / LEGACY_ETHASH_EPOCH_LENGTH;
 	for (uint32_t i = 0; i < epochs; ++i)
 		SHA3_256(&ret, (uint8_t*)&ret, 32);
 	return ret;
