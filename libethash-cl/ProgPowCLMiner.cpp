@@ -31,8 +31,8 @@ struct CLSwitchChannel: public LogChannel
 };
 #define clswitchlog clog(CLSwitchChannel)
 
-ProgPowCLMiner::ProgPowCLMiner(unsigned _index, PowType _powType, CLSettings _settings, DeviceDescriptor& _device)
-    : CLMiner(_index,_powType,_settings,_device)
+ProgPowCLMiner::ProgPowCLMiner(unsigned _index, CLSettings _settings, DeviceDescriptor& _device)
+    : CLMiner(_index, _settings,_device)
 {
     DEV_BUILD_LOG_PROGRAMFLOW(cllog, "cl-" << m_index << " ProgPowCLMiner::EthashCLMiner() called");
 }

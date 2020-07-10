@@ -26,7 +26,7 @@ class ProgPowCLMiner : public CLMiner
 {
 public:
 
-    ProgPowCLMiner(unsigned _index, PowType _powType, CLSettings _settings, DeviceDescriptor& _device);
+    ProgPowCLMiner(unsigned _index, CLSettings _settings, DeviceDescriptor& _device);
     ~ProgPowCLMiner() override;
 
 //    static void enumDevices(std::map<string, DeviceDescriptor>& _DevicesCollection);

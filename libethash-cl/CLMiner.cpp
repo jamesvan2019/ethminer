@@ -248,10 +248,10 @@ Miner* CLMinerFactory::GetCLMinerIntance(unsigned int _index, PowType _powType, 
         Miner* miner = nullptr;
         if (_powType == PowType::Ethash)
         {
-            miner = new CLMiner(_index, _powType, _settings, _device);
+            miner = new CLMiner(_index, _settings, _device);
         }else if (_powType == PowType::ProgPOW)
         {
-            miner = new ProgPowCLMiner(_index, _powType, _settings, _device);
+            miner = new ProgPowCLMiner(_index, _settings, _device);
         }else
         {
             cllog << "Unrecognized Pow Type";
@@ -259,8 +259,8 @@ Miner* CLMinerFactory::GetCLMinerIntance(unsigned int _index, PowType _powType, 
         return miner;
 }
 
-CLMiner::CLMiner(unsigned _index, PowType _powType, CLSettings _settings, DeviceDescriptor& _device)
-  : Miner("cl-", _index), m_powType(_powType), m_settings(_settings)
+CLMiner::CLMiner(unsigned _index, CLSettings _settings, DeviceDescriptor& _device)
+  : Miner("cl-", _index), m_settings(_settings)
 {
     m_deviceDescriptor = _device;
     m_settings.localWorkSize = ((m_settings.localWorkSize + 7) / 8) * 8;
