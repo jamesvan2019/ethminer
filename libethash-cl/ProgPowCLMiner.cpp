@@ -173,6 +173,11 @@ void ProgPowCLMiner::workLoop()
 
 bool ProgPowCLMiner::init(int epoch, uint64_t block_number, bool new_epoch, bool new_period)
 {
+    cllog << "ProgPow Miner init, epoch= " << epoch
+          << " block_number=" << block_number
+          << " new_epoch=" << new_epoch
+          << " new_period=" << new_period;
+
     assert(new_epoch || new_period);
 
     ProgPowAux::LightType light = ProgPowAux::light(epoch);
@@ -280,10 +285,9 @@ bool ProgPowCLMiner::init(int epoch, uint64_t block_number, bool new_epoch, bool
         // note: The kernels here are simply compiled version of the respective .cl kernels
         // into a byte array by bin2h.cmake. There is no need to load the file by hand in runtime
         // See libethash-cl/CMakeLists.txt: add_custom_command()
-        std::string code = ProgPow::getKern(block_number, ProgPow::KERNEL_CL);
-
         cllog << "OpenCL ProgPOW kernel";
-        code = string(progpow_cl, progpow_cl + sizeof(progpow_cl));
+        std::string code = ProgPow::getKern(block_number, ProgPow::KERNEL_CL);
+        code += string(progpow_cl, progpow_cl + sizeof(progpow_cl));
 
         addDefinition(code, "GROUP_SIZE", m_workgroupSize);
         addDefinition(code, "PROGPOW_DAG_BYTES", dagBytes);

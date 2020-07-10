@@ -103,8 +103,8 @@ std::string ProgPow::getKern(uint64_t block_number, kernel_t kern)
         ret << "void progPowLoop(const uint32_t loop,\n";
         ret << "        uint32_t mix[PROGPOW_REGS],\n";
         ret << "        __global const dag_t *g_dag,\n";
-        ret << "        __local const uint32_t c_dag[PROGPOW_CACHE_WORDS],\n";
-        ret << "        __local uint64_t share[GROUP_SHARE],\n";
+        ret << "        __local const uint32_t *c_dag,\n";
+        ret << "        __local uint64_t *share,\n";
         ret << "        const bool hack_false)\n";
 	}
 	ret << "{\n";

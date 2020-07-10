@@ -29,8 +29,6 @@ public:
     ProgPowCLMiner(unsigned _index, CLSettings _settings, DeviceDescriptor& _device);
     ~ProgPowCLMiner() override;
 
-//    static void enumDevices(std::map<string, DeviceDescriptor>& _DevicesCollection);
-
 protected:
 //    bool initDevice() override;
 
