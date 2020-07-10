@@ -1999,11 +1999,16 @@ string readFileIntoString(char * filename)
 
 int write_string_to_file_append(const std::string & file_string, const std::string str )
 {
-    str = transform(str.begin(),str.end(),str.begin(),::tolower);
     cnote << "write filename : " << file_string;
     cnote << "write content : " << str;
-    ofstream OutFile(file_string);
-    OutFile << str << endl;
-    OutFile.close();
+    std::ofstream fout(file_string, std::ios::binary);
+    std::vector<uint8_t> buffer = fromHex(str);
+    char* test = new char[buffer.size()];//init this with the correct size
+    std::copy(buffer.begin(),buffer.end(),test);
+    fout.write(test, buffer.size());
+    fout.close();
+    // ofstream OutFile(file_string);
+    // OutFile << str << endl;
+    // OutFile.close();
     return 0;
 }
