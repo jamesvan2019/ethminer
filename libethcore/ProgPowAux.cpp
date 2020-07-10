@@ -65,7 +65,7 @@ ProgPowAux::LightType ProgPowAux::light(int epoch)
 
 ProgPowAux::LightAllocation::LightAllocation(int epoch)
 {
-    int blockNumber = epoch * ETHASH_EPOCH_LENGTH;
+    int blockNumber = epoch * LEGACY_ETHASH_EPOCH_LENGTH;
     light = ethash_light_new(blockNumber);
     size = ethash_get_cachesize(blockNumber);
 }
