@@ -11,7 +11,6 @@
 #include "CLMiner.h"
 #include "ProgPowCLMiner.h"
 #include "ethash.h"
-#include "progpow.h"
 
 using namespace dev;
 using namespace eth;
@@ -196,16 +195,14 @@ std::string CLMiner::ethCLErrorHelper(const char* msg, cl::Error const& clerr)
 }
 
 
-namespace
-{
-void addDefinition(string& _source, char const* _id, unsigned _value)
+void CLMiner::addDefinition(string& _source, char const* _id, unsigned _value)
 {
     char buf[256];
     sprintf(buf, "#define %s %uu\n", _id, _value);
     _source.insert(_source.begin(), buf, buf + strlen(buf));
 }
 
-std::vector<cl::Platform> getPlatforms()
+std::vector<cl::Platform> CLMiner::getPlatforms()
 {
     vector<cl::Platform> platforms;
     try
@@ -224,7 +221,7 @@ std::vector<cl::Platform> getPlatforms()
     return platforms;
 }
 
-std::vector<cl::Device> getDevices(
+std::vector<cl::Device> CLMiner::getDevices(
     std::vector<cl::Platform> const& _platforms, unsigned _platformId)
 {
     vector<cl::Device> devices;
@@ -243,7 +240,6 @@ std::vector<cl::Device> getDevices(
     return devices;
 }
 
-}  // namespace
 
 }  // namespace eth
 }  // namespace dev
@@ -764,28 +760,13 @@ bool CLMiner::initEpoch_internal()
         // See libethash-cl/CMakeLists.txt: add_custom_command()
         // TODO: Just use C++ raw string literal.
         string code;
-        if (m_powType == PowType::Ethash)
-        {
-            cllog << "OpenCL Ethash kernel";
-            code = string(ethash_cl, ethash_cl + sizeof(ethash_cl));
 
-            // The Ethash Kernel Definitions
-            addDefinition(code, "WORKSIZE", m_settings.localWorkSize);
-            addDefinition(code, "ACCESSES", 64);
-        }
-        else if (m_powType == PowType::ProgPOW)
-        {
-            cllog << "OpenCL ProgPOW kernel";
-            code = string(progpow_cl, progpow_cl + sizeof(progpow_cl));
+        cllog << "OpenCL Ethash kernel";
+        code = string(ethash_cl, ethash_cl + sizeof(ethash_cl));
 
-            // The ProgPOW Kernel Definitions
-            // addDefinition(code, "GROUP_SIZE", m_workgroupSize);
-            // addDefinition(code, "PROGPOW_DAG_BYTES", dagBytes);
-            // addDefinition(code, "PROGPOW_DAG_ELEMENTS", dagElms);
-            // addDefinition(code, "LIGHT_WORDS", lightWords);
-        }
-
-        // shared Definition
+        // The Ethash Kernel Definitions
+        addDefinition(code, "WORKSIZE", m_settings.localWorkSize);
+        addDefinition(code, "ACCESSES", 64);
         addDefinition(code, "MAX_OUTPUTS", c_maxSearchResults);
         addDefinition(code, "PLATFORM", m_deviceDescriptor.clPlatformId);
         addDefinition(code, "COMPUTE", computeCapability);

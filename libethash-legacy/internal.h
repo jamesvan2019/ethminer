@@ -1,7 +1,7 @@
 #pragma once
 #include "compiler.h"
 #include "endian.h"
-#include "ethash.h"
+#include "legacy_ethash.h"
 #include <stdio.h>
 
 #define ENABLE_SSE 0
@@ -36,7 +36,7 @@ static inline void ethash_h256_reset(ethash_h256_t* hash)
 	memset(hash, 0, 32);
 }
 
-struct ethash_light {
+struct legacy_ethash_light {
 	void* cache;
 	uint64_t cache_size;
 	uint64_t block_number;

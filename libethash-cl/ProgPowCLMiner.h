@@ -17,6 +17,11 @@ enum CLKernelName {
     Experimental,
 };
 
+#define OPENCL_PLATFORM_UNKNOWN 0
+#define OPENCL_PLATFORM_NVIDIA  1
+#define OPENCL_PLATFORM_AMD     2
+#define OPENCL_PLATFORM_CLOVER  3
+
 class ProgPowCLMiner : public CLMiner
 {
 public:
@@ -36,7 +41,7 @@ protected:
 private:
 
     void workLoop() override;
-    //bool init(int epoch, uint64_t block_number, bool new_epoch, bool new_period);
+    bool init(int epoch, uint64_t block_number, bool new_epoch, bool new_period);
 
     cl::Context m_context;
     cl::CommandQueue m_queue;

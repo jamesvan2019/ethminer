@@ -20,15 +20,15 @@
 * @date 2015
 */
 
+#include "internal.h"
+#include "data_sizes.h"
+#include "endian.h"
+#include "fnv.h"
+#include "legacy_ethash.h"
+#include "sha3.h"
 #include <assert.h>
 #include <inttypes.h>
 #include <stddef.h>
-#include "ethash.h"
-#include "fnv.h"
-#include "endian.h"
-#include "internal.h"
-#include "data_sizes.h"
-#include "sha3.h"
 
 uint64_t ethash_get_datasize(uint64_t const block_number)
 {
@@ -226,7 +226,7 @@ ethash_h256_t ethash_get_seedhash(uint64_t block_number)
 
 ethash_light_t ethash_light_new_internal(uint64_t cache_size, ethash_h256_t const* seed)
 {
-	struct ethash_light *ret;
+	struct legacy_ethash_light *ret;
 	ret = calloc(sizeof(*ret), 1);
 	if (!ret) {
 		return NULL;

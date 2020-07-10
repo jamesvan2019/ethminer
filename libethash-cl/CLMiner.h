@@ -75,6 +75,13 @@ protected:
 
     static std::string ethCLErrorHelper(const char* msg, cl::Error const& clerr);
 
+    void addDefinition(string& _source, char const* _id, unsigned _value);
+
+    static std::vector<cl::Platform> getPlatforms();
+
+    static std::vector<cl::Device> getDevices(std::vector<cl::Platform> const& _platforms, unsigned _platformId);
+
+
 private:
     
     void workLoop() override;

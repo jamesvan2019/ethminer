@@ -1,13 +1,14 @@
 
 #pragma once
 
-#include <condition_variable>
-#include <libethash-legacy/ethash.h>
+#include "BlockHeader.h"
+#include "EthashAux.h"
+#include "Exceptions.h"
 #include <libdevcore/Log.h>
 #include <libdevcore/Worker.h>
-#include "BlockHeader.h"
-#include "Exceptions.h"
-#include "EthashAux.h"
+#include <libethash-legacy/legacy_ethash.h>
+#include <libethash-legacy/internal.h>
+#include <condition_variable>
 
 namespace dev
 {

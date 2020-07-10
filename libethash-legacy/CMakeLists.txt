@@ -4,7 +4,7 @@ endif()
 
 set(FILES
 	internal.c
-	ethash.h
+		legacy_ethash.h
 	endian.h
 	compiler.h
 	fnv.h
