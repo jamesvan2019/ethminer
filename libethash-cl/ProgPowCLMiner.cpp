@@ -12,13 +12,8 @@ using namespace dev;
 using namespace eth;
 
 #define LOG2_MAX_MINERS 5u
-#define MAX_MINERS (1u << LOG2_MAX_MINERS)
-
-unsigned ProgPowCLMiner::s_platformId = 0;
 unsigned ProgPowCLMiner::s_workgroupSize = 256; //defaultLocalWorkSize
 unsigned ProgPowCLMiner::s_initialGlobalWorkSize =  2048 * 256 ; // defaultGlobalWorkSizeMultiplier * defaultLocalWorkSize
-vector<int> ProgPowCLMiner::s_devices(MAX_MINERS, -1);
-
 
 constexpr size_t c_maxSearchResults = 1;
 std::chrono::high_resolution_clock::time_point workSwitchStart;
@@ -40,6 +35,8 @@ ProgPowCLMiner::ProgPowCLMiner(unsigned _index, CLSettings _settings, DeviceDesc
 ProgPowCLMiner::~ProgPowCLMiner()
 {
     DEV_BUILD_LOG_PROGRAMFLOW(cllog, "cl-" << m_index << " ProgPowCLMiner::~EthashCLMiner() begin");
+    stopWorking();
+    kick_miner();
     DEV_BUILD_LOG_PROGRAMFLOW(cllog, "cl-" << m_index << " ProgPowCLMiner::~EthashCLMiner() end");
 }
 
@@ -61,6 +58,9 @@ void ProgPowCLMiner::workLoop()
     current.header = h256{1u};
     uint64_t old_period_seed = -1;
 
+    if (!initDevice())
+        return;
+
     try {
         while (!shouldStop())
         {
@@ -77,7 +77,8 @@ void ProgPowCLMiner::workLoop()
                     continue;
                 }
 
-                //cllog << "New work: header" << w.header << "target" << w.boundary.hex();
+
+                DEV_BUILD_LOG_PROGRAMFLOW(cllog, "cl-" << m_index << " New work: header=" << w.header << ", target=" << w.boundary.hex());
 
                 if (current.epoch != w.epoch || old_period_seed != period_seed)
                 {
@@ -182,9 +183,9 @@ bool ProgPowCLMiner::init(int epoch, uint64_t block_number, bool new_epoch, bool
 
     ProgPowAux::LightType light = ProgPowAux::light(epoch);
 
-    // get all platforms
     try
     {
+        /*
         vector<cl::Platform> platforms = getPlatforms();
         if (platforms.empty())
             return false;
@@ -251,25 +252,25 @@ bool ProgPowCLMiner::init(int epoch, uint64_t block_number, bool new_epoch, bool
                 return false;
             }
         }
-
-        char options[256];
+         */
+        char options[256] = {0};
         int computeCapability = 0;
-        if (platformId == OPENCL_PLATFORM_NVIDIA) {
-            cl_uint computeCapabilityMajor;
-            cl_uint computeCapabilityMinor;
-            clGetDeviceInfo(device(), CL_DEVICE_COMPUTE_CAPABILITY_MAJOR_NV, sizeof(cl_uint), &computeCapabilityMajor, NULL);
-            clGetDeviceInfo(device(), CL_DEVICE_COMPUTE_CAPABILITY_MINOR_NV, sizeof(cl_uint), &computeCapabilityMinor, NULL);
+#ifndef __clang__
 
-            computeCapability = computeCapabilityMajor * 10 + computeCapabilityMinor;
+        // Nvidia
+        if (!m_deviceDescriptor.clNvCompute.empty())
+        {
+            computeCapability =
+                m_deviceDescriptor.clNvComputeMajor * 10 + m_deviceDescriptor.clNvComputeMinor;
             int maxregs = computeCapability >= 35 ? 72 : 63;
             sprintf(options, "-cl-nv-maxrregcount=%d", maxregs);
         }
-        else {
-            sprintf(options, "%s", "");
-        }
+
+#endif
+
         // create context
-        m_context = cl::Context(vector<cl::Device>(&device, &device + 1));
-        m_queue = cl::CommandQueue(m_context, device);
+        m_context = cl::Context(vector<cl::Device>(&m_device, &m_device + 1));
+        m_queue = cl::CommandQueue(m_context, m_device);
 
         // make sure that global work size is evenly divisible by the local workgroup size
         m_workgroupSize = s_workgroupSize;
@@ -294,7 +295,7 @@ bool ProgPowCLMiner::init(int epoch, uint64_t block_number, bool new_epoch, bool
         addDefinition(code, "PROGPOW_DAG_ELEMENTS", dagElms);
         addDefinition(code, "LIGHT_WORDS", lightWords);
         addDefinition(code, "MAX_OUTPUTS", c_maxSearchResults);
-        addDefinition(code, "PLATFORM", platformId);
+        addDefinition(code, "PLATFORM", m_deviceDescriptor.clPlatformId);
         addDefinition(code, "COMPUTE", computeCapability);
 
         ofstream out;
@@ -307,22 +308,22 @@ bool ProgPowCLMiner::init(int epoch, uint64_t block_number, bool new_epoch, bool
         cl::Program program(m_context, sources);
         try
         {
-            program.build({device}, options);
-            cllog << "Build info:" << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(device);
+            program.build({m_device}, options);
+            cllog << "Build info:" << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(m_device);
         }
         catch (cl::Error const&)
         {
-            cwarn << "Build info:" << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(device);
+            cwarn << "Build info:" << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(m_device);
             return false;
         }
 
         //check whether the current dag fits in memory everytime we recreate the DAG
         cl_ulong result = 0;
-        device.getInfo(CL_DEVICE_GLOBAL_MEM_SIZE, &result);
+        m_device.getInfo(CL_DEVICE_GLOBAL_MEM_SIZE, &result);
         if (result < dagBytes)
         {
             cnote <<
-                  "OpenCL device " << device.getInfo<CL_DEVICE_NAME>()
+                  "OpenCL device " << m_device.getInfo<CL_DEVICE_NAME>()
                   << " has insufficient GPU memory." << result <<
                   " bytes of memory found < " << dagBytes << " bytes of memory required";
             return false;

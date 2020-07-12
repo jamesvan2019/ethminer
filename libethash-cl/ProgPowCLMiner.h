@@ -12,29 +12,12 @@ namespace dev
 namespace eth
 {
 
-enum CLKernelName {
-    Stable,
-    Experimental,
-};
-
-#define OPENCL_PLATFORM_UNKNOWN 0
-#define OPENCL_PLATFORM_NVIDIA  1
-#define OPENCL_PLATFORM_AMD     2
-#define OPENCL_PLATFORM_CLOVER  3
-
 class ProgPowCLMiner : public CLMiner
 {
 public:
 
     ProgPowCLMiner(unsigned _index, CLSettings _settings, DeviceDescriptor& _device);
     ~ProgPowCLMiner() override;
-
-protected:
-//    bool initDevice() override;
-
-//    bool initEpoch_internal() override;
-
-//    void kick_miner() override;
 
 private:
 
@@ -51,12 +34,6 @@ private:
     cl::Buffer m_searchBuffer;
     unsigned m_globalWorkSize = 0;
     unsigned m_workgroupSize = 0;
-
-    static unsigned s_platformId;
-    static unsigned s_numInstances;
-    static unsigned s_threadsPerHash;
-    static CLKernelName s_clKernelName;
-    static vector<int> s_devices;
 
     /// The local work size for the search
     static unsigned s_workgroupSize;

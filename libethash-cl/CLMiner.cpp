@@ -262,6 +262,7 @@ Miner* CLMinerFactory::GetCLMinerIntance(unsigned int _index, PowType _powType, 
 CLMiner::CLMiner(unsigned _index, CLSettings _settings, DeviceDescriptor& _device)
   : Miner("cl-", _index), m_settings(_settings)
 {
+    DEV_BUILD_LOG_PROGRAMFLOW(cllog, "cl-" << m_index << " CLMiner::CLMiner() called");
     m_deviceDescriptor = _device;
     m_settings.localWorkSize = ((m_settings.localWorkSize + 7) / 8) * 8;
     m_settings.globalWorkSize = m_settings.localWorkSize * m_settings.globalWorkSizeMultiplier;

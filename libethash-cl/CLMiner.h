@@ -81,6 +81,7 @@ protected:
 
     static std::vector<cl::Device> getDevices(std::vector<cl::Platform> const& _platforms, unsigned _platformId);
 
+    cl::Device m_device;
 
 private:
     
@@ -91,7 +92,6 @@ private:
     vector<cl::CommandQueue> m_abortqueue;
     cl::Kernel m_searchKernel;
     cl::Kernel m_dagKernel;
-    cl::Device m_device;
 
     vector<cl::Buffer> m_dag;
     vector<cl::Buffer> m_light;
