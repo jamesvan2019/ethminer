@@ -1,4 +1,8 @@
 cmake_policy(SET CMP0015 NEW)
+if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.12.0")
+	message(STATUS "For CMake 3.12 and above, Setting policy CMP0074 to use <PackageName>_ROOT variables")
+	cmake_policy(SET CMP0074 NEW)
+endif()
 
 aux_source_directory(. SRC_LIST)
 
