@@ -100,7 +100,7 @@ std::string ProgPow::getKern(uint64_t block_number, kernel_t kern)
         ret << "typedef struct __attribute__ ((aligned (PROGPOW_DAG_LOADS * 4))) {uint32_t s[PROGPOW_DAG_LOADS];} dag_t;\n";
         ret << "\n";
         ret << "// Inner loop for prog_seed " << prog_seed << "\n";
-        ret << "void progPowLoop(const uint32_t loop,\n";
+        ret << "static void progPowLoop(const uint32_t loop,\n";
         ret << "        uint32_t mix[PROGPOW_REGS],\n";
         ret << "        __global const dag_t *g_dag,\n";
         ret << "        __local const uint32_t *c_dag,\n";

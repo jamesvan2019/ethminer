@@ -33,7 +33,7 @@ __constant const uint32_t keccakf_rndc[24] = {
 };
 
 // Implementation of the Keccakf transformation with a width of 800
-void keccak_f800_round(uint32_t st[25], const int r)
+static void keccak_f800_round(uint32_t st[25], const int r)
 {
 
     const uint32_t keccakf_rotc[24] = {
@@ -80,7 +80,7 @@ void keccak_f800_round(uint32_t st[25], const int r)
 // Keccak - implemented as a variant of SHAKE
 // The width is 800, with a bitrate of 576, a capacity of 224, and no padding
 // Only need 64 bits of output for mining
-uint64_t keccak_f800(__constant hash32_t const* g_header, uint64_t seed, hash32_t digest)
+static uint64_t keccak_f800(__constant hash32_t const* g_header, uint64_t seed, hash32_t digest)
 {
     uint32_t st[25];
 
@@ -113,7 +113,7 @@ typedef struct {
 // KISS99 is simple, fast, and passes the TestU01 suite
 // https://en.wikipedia.org/wiki/KISS_(algorithm)
 // http://www.cse.yorku.ca/~oz/marsaglia-rng.html
-uint32_t kiss99(kiss99_t *st)
+static uint32_t kiss99(kiss99_t *st)
 {
     st->z = 36969 * (st->z & 65535) + (st->z >> 16);
     st->w = 18000 * (st->w & 65535) + (st->w >> 16);
@@ -125,7 +125,7 @@ uint32_t kiss99(kiss99_t *st)
     return ((MWC^st->jcong) + st->jsr);
 }
 
-void fill_mix(uint64_t seed, uint32_t lane_id, uint32_t mix[PROGPOW_REGS])
+static void fill_mix(uint64_t seed, uint32_t lane_id, uint32_t mix[PROGPOW_REGS])
 {
     // Use FNV to expand the per-warp seed to per-lane
     // Use KISS to expand the per-lane seed to fill mix
@@ -162,7 +162,7 @@ __kernel void ethash_search(
 
     uint32_t const lid = get_local_id(0);
     uint32_t const gid = get_global_id(0);
-    uint64_t const nonce = start_nonce + gid;
+    // uint64_t const nonce = start_nonce + gid;
 
     const uint32_t lane_id = lid & (PROGPOW_LANES - 1);
     const uint32_t group_id = lid / PROGPOW_LANES;
