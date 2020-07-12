@@ -58,6 +58,23 @@ For a full list of available command, please run:
 ethminer --help
 ```
 
+
+Use option `-W` to switch between Ethash/ProgPOW
+
+ - ETASH
+
+```sh
+ethminer -G -M 100 -W ethash
+```
+
+ - ProgPOW
+
+```sh
+ethminer -G -M 100 -W progpow
+```
+
+
+
 ### Examples connecting to pools
 
 Check our [samples](docs/POOL_EXAMPLES_ETH.md) to see how to connect to different pools.
