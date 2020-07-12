@@ -61,13 +61,13 @@ ethminer --help
 
 Use option `-W` to switch between Ethash/ProgPOW
 
- - Ethash
+ - **Ethash**
 
 ```sh
 ethminer -G -M 100 -W ethash
 ```
 
- - ProgPOW
+ - **ProgPOW**
 
 ```sh
 ethminer -G -M 100 -W progpow
