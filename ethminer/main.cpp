@@ -57,7 +57,7 @@ bool g_running = false;
 bool g_exitOnError = false;  // Whether or not ethminer should exit on mining threads errors
 
 condition_variable g_shouldstop;
-boost::asio::io_service g_io_service;  // The IO service itself
+boost::asio::io_context g_io_service;  // The IO service itself
 
 struct MiningChannel : public LogChannel
 {
@@ -89,7 +89,7 @@ public:
             &MinerCLI::cliDisplayInterval_elapsed, this, boost::asio::placeholders::error)));
 
         // Start io_service in it's own thread
-        m_io_thread = std::thread{boost::bind(&boost::asio::io_service::run, &g_io_service)};
+        m_io_thread = std::thread{boost::bind(&boost::asio::io_context::run, &g_io_service)};
 
         // Io service is now live and running
         // All components using io_service should post to reference of g_io_service
@@ -1253,7 +1253,7 @@ private:
     // Global boost's io_service
     std::thread m_io_thread;                        // The IO service thread
     boost::asio::deadline_timer m_cliDisplayTimer;  // The timer which ticks display lines
-    boost::asio::io_service::strand m_io_strand;    // A strand to serialize posts in
+    boost::asio::io_context::strand m_io_strand;    // A strand to serialize posts in
                                                     // multithreaded environment
 
     // Physical Mining Devices descriptor

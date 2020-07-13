@@ -15,6 +15,12 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
 
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-unknown-pragmas -Wextra")
 
+    # Since BOOST 1.69, it use hidden visibility by default which cause a link marning on OSX.
+    # see https://github.com/Microsoft/vcpkg/issues/4497
+    # see https://www.boost.org/users/history/version_1_69_0.html
+    eth_add_cxx_compiler_flag_if_supported(-fvisibility-inlines-hidden)
+    eth_add_cxx_compiler_flag_if_supported(-fvisibility=hidden)
+
     eth_add_cxx_compiler_flag_if_supported(-ffunction-sections)
     eth_add_cxx_compiler_flag_if_supported(-fdata-sections)
     eth_add_cxx_linker_flag_if_supported(-Wl,--gc-sections)

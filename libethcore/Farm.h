@@ -42,7 +42,7 @@
 #include <libhwmon/wrapadl.h>
 #endif
 
-extern boost::asio::io_service g_io_service;
+extern boost::asio::io_context g_io_service;
 
 namespace dev
 {
@@ -278,9 +278,9 @@ private:
     CLSettings m_CLSettings;  // OpenCL settings passed to CL Miner instantiator
     CPSettings m_CPSettings;  // CPU settings passed to CPU Miner instantiator
 
-    boost::asio::io_service::strand m_io_strand;
+    boost::asio::io_context::strand m_io_strand;
     boost::asio::deadline_timer m_collectTimer;
-    static const int m_collectInterval = 5000;
+    const int m_collectInterval = 5000;
 
     string m_pool_addresses;
 
