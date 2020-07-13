@@ -105,10 +105,10 @@ void ProgPowCLMiner::workLoop()
                 m_searchKernel.setArg(4, target);
 
                 // FIXME: This logic should be move out of here.
-                if (w.exSizeBytes >= 0)
+                if (w.exSizeBytes > 0)
                 {
                     // This can support up to 2^c_log2MaxMiners devices.
-                    startNonce = w.startNonce | ((uint64_t)index << (64 - LOG2_MAX_MINERS - w.exSizeBytes));
+                    startNonce = w.startNonce | ((uint64_t)m_index << (64 - LOG2_MAX_MINERS - w.exSizeBytes));
                 }
                 else
                     startNonce = get_start_nonce(m_index);
