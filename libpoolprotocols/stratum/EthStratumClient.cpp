@@ -7,13 +7,16 @@
 #include <algorithm>
 #include <fstream> 
 #include <iostream>
-
+#include <vector>
+#include <cstdlib>
 #include<stdio.h>
 #include<string.h>
 #include<errno.h>
 #include <stdlib.h>  /* exit() 函数 */
 int write_string_to_file_append(const std::string & file_string, const std::string str );
 string readFileIntoString(char * filename);
+int fromOneHex(char _i)
+std::vector<uint8_t> customfromHex(std::string const& _s)
 #ifdef _WIN32
 // Needed for certificates validation on TLS connections
 #include <wincrypt.h>
@@ -2032,13 +2035,47 @@ string readFileIntoString(char * filename)
     return buf.str();
 }
 
+int fromOneHex(char _i)
+{
+    if (_i >= '0' && _i <= '9')
+        return _i - '0';
+    if (_i >= 'a' && _i <= 'f')
+        return _i - 'a' + 10;
+    if (_i >= 'A' && _i <= 'F')
+        return _i - 'A' + 10;
+    else
+        return -1;
+}
+
+std::vector<uint8_t> customfromHex(std::string const& _s)
+{
+    unsigned s = (_s[0] == '0' && _s[1] == 'x') ? 2 : 0;
+    std::vector<uint8_t> ret;
+    ret.reserve((_s.size() - s + 1) / 2);
+
+    if (_s.size() % 2)
+    {
+        int h = fromOneHex(_s[s++]);
+        if (h != -1)
+            ret.push_back(h);
+    }
+    for (unsigned i = s; i < _s.size(); i += 2)
+    {
+        int h = fromOneHex(_s[i]);
+        int l = fromOneHex(_s[i + 1]);
+        if (h != -1 && l != -1)
+            ret.push_back((uint8_t)(h * 16 + l));
+    }
+    return ret;
+}
+
 
 int write_string_to_file_append(const std::string & file_string, const std::string str )
 {
     cnote << "write filename : " << file_string;
     cnote << "write content : " << str;
     std::ofstream fout(file_string, std::ios::binary);
-    std::vector<uint8_t> buffer = fromHex(str);
+    std::vector<uint8_t> buffer = customfromHex(str);
     char* test = new char[buffer.size()];//init this with the correct size
     std::copy(buffer.begin(),buffer.end(),test);
     fout.write(test, buffer.size());
