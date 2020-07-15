@@ -1619,6 +1619,7 @@ void EthStratumClient::submitSolution(const Solution& solution)
     FILE *fstream=NULL;//执行签名
     char buff[1024];
     memset(buff,0,sizeof(buff));
+    cout << "mining.submit : " << m_conn->StratumMode() << endl;
     switch (m_conn->StratumMode())
     {
     case EthStratumClient::STRATUM:
