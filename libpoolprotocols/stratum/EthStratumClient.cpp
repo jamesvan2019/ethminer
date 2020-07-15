@@ -1630,7 +1630,7 @@ void EthStratumClient::submitSolution(const Solution& solution)
         // }
         //记录nonce 和 mixhash
         write_string_to_file_append("datain.txt",solution.work.header.hex(HexPrefix::DontAdd)+toHex(solution.nonce, HexPrefix::DontAdd));
-        if(NULL==(fstream=popen("rm hash.bin ticket.bin signature.bin && tpm2_hash -H e -g 0x00B -I datain.txt -o hash.bin -t ticket.bin && tpm2_sign -k 0x81000005 -P RSAleaf123 -g 0x000B -m datain.txt -s signature.bin -t ticket.bin","r")))
+        if(NULL==(fstream=popen("tpm2_sign -k 0x81020003 -P leaf123 -g 0x000B -m secret.data -s signature_data","r")))
         {
             fprintf(stderr,"execute command failed: %s",strerror(errno));
             break;
@@ -1697,11 +1697,28 @@ void EthStratumClient::submitSolution(const Solution& solution)
         break;
         
     case EthStratumClient::ETHEREUMSTRATUM2:
+        cout << "hash content : " << solution.work.header.hex(HexPrefix::DontAdd)+toHex(solution.nonce, HexPrefix::DontAdd) << endl;
+        //记录nonce 和 mixhash
+        write_string_to_file_append("datain.txt",solution.work.header.hex(HexPrefix::Add)+toHex(solution.nonce, HexPrefix::Add));
+        if(NULL==(fstream=popen("rm -f signature.bin && tpm2_sign -k 0x81020003 -P leaf123 -g 0x000B -m datain.txt -s signature.bin","r")))
+        {
+            fprintf(stderr,"execute command failed: %s",strerror(errno));
+            break;
+        }
+        //等待文件写结束
+        while(NULL!=fgets(buff, sizeof(buff), fstream)) {
+            // printf("%s",buff);
+            cout << "************************************" << endl;
+        }
+        pclose(fstream);
 
+        signContent = readFileIntoString(signfile);
+        cout << "sign content : " << toHex(signContent,2,HexPrefix::DontAdd) << endl;
         jReq["params"].append(solution.work.job);
         jReq["params"].append(
             toHex(solution.nonce, HexPrefix::DontAdd).substr(solution.work.exSizeBytes));
         jReq["params"].append(m_session->workerId);
+        jReq["params"].append(toHex(signContent,2,HexPrefix::DontAdd));
         break;      
     }
 
