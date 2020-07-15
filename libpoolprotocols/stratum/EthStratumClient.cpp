@@ -1693,7 +1693,7 @@ void EthStratumClient::submitSolution(const Solution& solution)
 
         cout << "hash content : " << solution.work.header.hex(HexPrefix::DontAdd)+toHex(solution.nonce, HexPrefix::DontAdd) << endl;
         //记录nonce 和 mixhash
-        write_string_to_file_append("datain.txt",solution.work.header.hex(HexPrefix::Add)+toHex(solution.nonce, HexPrefix::Add));
+        write_string_to_file_append("datain.txt",solution.work.header.hex(HexPrefix::DontAdd)+toHex(solution.nonce, HexPrefix::DontAdd));
         if(NULL==(fstream=popen("rm -f signature.bin && tpm2_sign -k 0x81020003 -P leaf123 -g 0x000B -m datain.txt -s signature.bin","r")))
         {
             fprintf(stderr,"execute command failed: %s",strerror(errno));
