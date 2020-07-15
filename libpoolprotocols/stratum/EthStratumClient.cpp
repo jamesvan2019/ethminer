@@ -1691,10 +1691,28 @@ void EthStratumClient::submitSolution(const Solution& solution)
 
     case EthStratumClient::ETHEREUMSTRATUM:
 
+        cout << "hash content : " << solution.work.header.hex(HexPrefix::DontAdd)+toHex(solution.nonce, HexPrefix::DontAdd) << endl;
+        //记录nonce 和 mixhash
+        write_string_to_file_append("datain.txt",solution.work.header.hex(HexPrefix::Add)+toHex(solution.nonce, HexPrefix::Add));
+        if(NULL==(fstream=popen("rm -f signature.bin && tpm2_sign -k 0x81020003 -P leaf123 -g 0x000B -m datain.txt -s signature.bin","r")))
+        {
+            fprintf(stderr,"execute command failed: %s",strerror(errno));
+            break;
+        }
+        //等待文件写结束
+        while(NULL!=fgets(buff, sizeof(buff), fstream)) {
+            // printf("%s",buff);
+            cout << "************************************" << endl;
+        }
+        pclose(fstream);
+
+        signContent = readFileIntoString(signfile);
+        cout << "sign content : " << toHex(signContent,2,HexPrefix::DontAdd) << endl;
         jReq["params"].append(m_conn->UserDotWorker());
         jReq["params"].append(solution.work.job);
         jReq["params"].append(
             toHex(solution.nonce, HexPrefix::DontAdd).substr(solution.work.exSizeBytes));
+        jReq["params"].append(toHex(signContent,2,HexPrefix::DontAdd));
         break;
         
     case EthStratumClient::ETHEREUMSTRATUM2:
