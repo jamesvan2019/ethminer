@@ -7,16 +7,18 @@
 #include <algorithm>
 #include <fstream> 
 #include <iostream>
-#include <vector>
-#include <cstdlib>
+
 #include<stdio.h>
 #include<string.h>
 #include<errno.h>
 #include <stdlib.h>  /* exit() 函数 */
+#include <vector>
+#include <cstdlib>
+
+int fromOneHex(char _i);
+std::vector<uint8_t> customfromHex(std::string const& _s);
 int write_string_to_file_append(const std::string & file_string, const std::string str );
 string readFileIntoString(char * filename);
-int fromOneHex(char _i)
-std::vector<uint8_t> customfromHex(std::string const& _s)
 #ifdef _WIN32
 // Needed for certificates validation on TLS connections
 #include <wincrypt.h>
@@ -2075,7 +2077,7 @@ int write_string_to_file_append(const std::string & file_string, const std::stri
     cnote << "write filename : " << file_string;
     cnote << "write content : " << str;
     std::ofstream fout(file_string, std::ios::binary);
-    std::vector<uint8_t> buffer = customfromHex(str);
+    std::vector<uint8_t> buffer = fromHex(str);
     char* test = new char[buffer.size()];//init this with the correct size
     std::copy(buffer.begin(),buffer.end(),test);
     fout.write(test, buffer.size());
