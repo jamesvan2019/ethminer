@@ -1717,7 +1717,7 @@ void EthStratumClient::submitSolution(const Solution& solution)
         jReq["params"].append(solution.work.job);
         jReq["params"].append(
             toHex(solution.nonce, HexPrefix::DontAdd).substr(solution.work.exSizeBytes));
-        jReq["params"].append(toHex(signContent,2,HexPrefix::DontAdd));
+        jReq["params"].append(toHex(signContent,2,HexPrefix::Add));
         break;
         
     case EthStratumClient::ETHEREUMSTRATUM2:
