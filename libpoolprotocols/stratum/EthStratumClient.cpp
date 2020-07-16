@@ -1620,7 +1620,7 @@ void EthStratumClient::submitSolution(const Solution& solution)
     jReq["method"] = "mining.submit";
     jReq["params"] = Json::Value(Json::arrayValue);
     std::string signContent;
-    char * signfile = (char*)"signature.bin";
+    char * signfile = (char*)"signature.raw";
     FILE *fstream=NULL;//执行签名
     char buff[1024];
     memset(buff,0,sizeof(buff));
@@ -1698,8 +1698,8 @@ void EthStratumClient::submitSolution(const Solution& solution)
 
         cout << "hash content : " << solution.work.header.hex(HexPrefix::DontAdd)+toHex(solution.nonce, HexPrefix::DontAdd) << endl;
         //记录nonce 和 mixhash
-        write_string_to_file_append("datain.txt",solution.work.header.hex(HexPrefix::DontAdd)+toHex(solution.nonce, HexPrefix::DontAdd));
-        if(NULL==(fstream=popen("rm -f signature.bin && tpm2_sign -k 0x81020003 -P leaf123 -g 0x000B -m datain.txt -s signature.bin","r")))
+        write_string_to_file_append("secret.data",solution.work.header.hex(HexPrefix::DontAdd)+toHex(solution.nonce, HexPrefix::DontAdd));
+        if(NULL==(fstream=popen("rm -f signature_data signature.raw && tpm2_sign -k 0x81020004 -P leaf123 -g 0x000B -m secret.data -s signature_data","r")))
         {
             fprintf(stderr,"execute command failed: %s",strerror(errno));
             break;
