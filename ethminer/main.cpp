@@ -34,6 +34,9 @@
 #if ETH_ETHASHCPU
 #include <libethash-cpu/CPUMiner.h>
 #endif
+#if ETH_METAL
+#include <libminer-metal/MetalMiner.h>
+#endif
 #include <libpoolprotocols/PoolManager.h>
 
 #if API_CORE
@@ -235,6 +238,9 @@ public:
 #if ETH_ETHASHCPU
                     "cp",
 #endif
+#if ETH_METAL
+                    "mt",
+#endif
 #if API_CORE
                     "api",
 #endif
@@ -304,7 +310,7 @@ public:
 
 #endif
 
-#if ETH_ETHASHCL || ETH_ETHASHCUDA || ETH_ETHASH_CPU
+#if ETH_ETHASHCL || ETH_ETHASHCUDA || ETH_ETHASH_CPU || ETH_METAL
 
         app.add_flag("--list-devices", m_shouldListDevices, "");
         std::map<std::string, PowType> map = {{"ethash", PowType::Ethash}, {"progpow", PowType::ProgPOW}};
@@ -365,6 +371,11 @@ public:
 #if ETH_ETHASHCPU
         app.add_flag("--cpu", cpu_miner, "");
 #endif
+        bool metal_miner = false;
+#if ETH_METAL
+        app.add_flag("-T,--metal", metal_miner, "");
+        app.add_option("--metal-devices,--mt-devices", m_MTLSettings.devices, "");
+#endif
         auto sim_opt = app.add_option("-Z,--simulation,-M,--benchmark", m_PoolSettings.benchmarkBlock, "", true);
 
         app.add_option("--tstop", m_FarmSettings.tempStop, "", true)->check(CLI::Range(30, 100));
@@ -408,6 +419,8 @@ public:
             m_minerType = MinerType::CL;
         else if (cuda_miner)
             m_minerType = MinerType::CUDA;
+        else if (metal_miner)
+            m_minerType = MinerType::METAL;
         else if (cpu_miner)
             m_minerType = MinerType::CPU;
         else
@@ -513,6 +526,10 @@ public:
 #if ETH_ETHASHCUDA
         if (m_minerType == MinerType::CUDA || m_minerType == MinerType::Mixed)
             CUDAMiner::enumDevices(m_DevicesCollection);
+#endif
+#if ETH_METAL
+        if (m_minerType == MinerType::METAL || m_minerType == MinerType::Mixed)
+            MetalMiner::enumDevices(m_DevicesCollection);
 #endif
 #if ETH_ETHASHCPU
         if (m_minerType == MinerType::CPU)
@@ -675,6 +692,23 @@ public:
             }
         }
 #endif
+#if ETH_METAL
+        if (m_MTLSettings.devices.size() &&
+            (m_minerType == MinerType::METAL || m_minerType == MinerType::Mixed))
+        {
+            for (auto index : m_MTLSettings.devices)
+            {
+                if (index < m_DevicesCollection.size())
+                {
+                    auto it = m_DevicesCollection.begin();
+                    std::advance(it, index);
+                    if (!it->second.mtlDetected)
+                        throw std::runtime_error("Can't subscribe a non-Metel device.");
+                    it->second.subscriptionType = DeviceSubscriptionTypeEnum::Metal;
+                }
+            }
+        }
+#endif
 #if ETH_ETHASHCPU
         if (m_CPSettings.devices.size() && (m_minerType == MinerType::CPU))
         {
@@ -715,6 +749,19 @@ public:
                     it->second.subscriptionType != DeviceSubscriptionTypeEnum::None)
                     continue;
                 it->second.subscriptionType = DeviceSubscriptionTypeEnum::OpenCL;
+            }
+        }
+#endif
+#if ETH_METAL
+        if (!m_MTLSettings.devices.size() &&
+            (m_minerType == MinerType::METAL || m_minerType == MinerType::Mixed))
+        {
+            for (auto it = m_DevicesCollection.begin(); it != m_DevicesCollection.end(); it++)
+            {
+                if ( !it->second.mtlDetected ||
+                    it->second.subscriptionType != DeviceSubscriptionTypeEnum::None)
+                    continue;
+                it->second.subscriptionType = DeviceSubscriptionTypeEnum::Metal;
             }
         }
 #endif
@@ -773,6 +820,9 @@ public:
 #if ETH_ETHASHCUDA
              << "    -U,--cuda           Mine/Benchmark using CUDA only" << endl
 #endif
+#if ETH_METAL
+             << "    -T,--metal          Mine/Benchmark using Metal only" << endl
+#endif
 #if ETH_ETHASHCPU
              << "    --cpu               Development ONLY ! (NO MINING)" << endl
 #endif
@@ -813,6 +863,9 @@ public:
 #endif
 #if ETH_ETHASHCUDA
              << "                        'cu'   Extended CUDA options" << endl
+#endif
+#if ETH_METAL
+             << "                        'mt'   Extended Metal options" << endl
 #endif
 #if ETH_ETHASHCPU
              << "                        'cp'   Extended CPU options" << endl
@@ -950,6 +1003,20 @@ public:
                     "results"
                  << endl
                  << "                                from the device" << endl
+                 << endl;
+        }
+
+        if (ctx == "mt")
+        {
+            cout << "Metal Extended Options :" << endl
+                 << endl
+                 << "    Use this extended Metal arguments"
+                 << endl
+                 << endl
+                 << "    --mt-devices        UINT {} Default not set" << endl
+                 << "                        Space separated list of device indexes to use" << endl
+                 << "                        eg --mt-devices 0 2 3" << endl
+                 << "                        If not set all available Metal device will be used" << endl
                  << endl;
         }
 
@@ -1271,6 +1338,7 @@ private:
     PoolSettings m_PoolSettings;  // Operating settings for PoolManager
     CLSettings m_CLSettings;          // Operating settings for CL Miners
     CUSettings m_CUSettings;          // Operating settings for CUDA Miners
+    MTLSettings m_MTLSettings;        // Operating settings for Metal Miners
     CPSettings m_CPSettings;          // Operating settings for CPU Miners
 
     //// -- Pool manager related params

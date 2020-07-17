@@ -26,6 +26,10 @@
 #include <libethash-cuda/CUDAMiner.h>
 #endif
 
+#if ETH_METAL
+#include <libminer-metal/MetalMiner.h>
+#endif
+
 #if ETH_ETHASHCPU
 #include <libethash-cpu/CPUMiner.h>
 #endif
@@ -279,6 +283,16 @@ bool Farm::start()
                 m_miners.push_back(std::shared_ptr<Miner>(
                     (new CLMinerFactory())->GetCLMinerIntance(
                         m_miners.size(), m_powType, m_CLSettings, it->second)));
+            }
+#endif
+
+#if ETH_METAL
+
+            if (it->second.subscriptionType == DeviceSubscriptionTypeEnum::Metal)
+            {
+                minerTelemetry.prefix = "mtl";
+                m_miners.push_back(std::shared_ptr<Miner>(
+                    new MetalMiner(m_miners.size(), m_MTLSettings, it->second)));
             }
 #endif
 #if ETH_ETHASHCPU

@@ -276,6 +276,7 @@ private:
     PowType m_powType;        // Pow Type passed to Miners instantiator separately with its settings
     CUSettings m_CUSettings;  // Cuda settings passed to CUDA Miner instantiator
     CLSettings m_CLSettings;  // OpenCL settings passed to CL Miner instantiator
+    MTLSettings m_MTLSettings;// Metal settings passed to Metal Miner instantiator
     CPSettings m_CPSettings;  // CPU settings passed to CPU Miner instantiator
 
     boost::asio::io_context::strand m_io_strand;

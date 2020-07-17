@@ -52,6 +52,7 @@ enum class DeviceSubscriptionTypeEnum
     None,
     OpenCL,
     Cuda,
+    Metal,
     Cpu
 
 };
@@ -66,6 +67,7 @@ enum class MinerType
     Mixed,
     CL,
     CUDA,
+    METAL,
     CPU
 };
 
@@ -115,6 +117,11 @@ struct CLSettings : public MinerSettings
     unsigned globalWorkSize = 0;
     unsigned globalWorkSizeMultiplier = 65536;
     unsigned localWorkSize = 128;
+};
+
+// Holds settings for Metal Miner
+struct MTLSettings : public MinerSettings
+{
 };
 
 // Holds settings for CPU Miner
@@ -202,6 +209,14 @@ struct DeviceDescriptor
     string cuCompute;
     unsigned int cuComputeMajor;
     unsigned int cuComputeMinor;
+
+    bool mtlDetected;  // For Metal detected devices
+    string mtlName;
+    unsigned int mtlDeviceOrdinal;
+    unsigned int mtlDeviceIndex;
+    string mtlCompute;
+    unsigned int mtlComputeMajor;
+    unsigned int mtlComputeMinor;
 
     int cpCpuNumer;   // For CPU
 };

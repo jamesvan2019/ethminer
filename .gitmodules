@@ -5,3 +5,7 @@
 	path = cmake/cable
 	url = https://github.com/ethereum/cable
 	branch = master
+[submodule "libmtlpp"]
+	path = libmtlpp
+	url = https://github.com/dindinw/libmtlpp
+	branch = master
