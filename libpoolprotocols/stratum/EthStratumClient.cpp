@@ -1629,16 +1629,12 @@ void EthStratumClient::submitSolution(const Solution& solution)
     {
     case EthStratumClient::STRATUM:
 
-        // if(NULL==(fstream=popen("rm -f datain.txt","r")))
-        // {
-        //     fprintf(stderr,"execute command failed: %s",strerror(errno));
-        //     break;
-        // }
+        cout << "hash content : " << solution.work.header.hex(HexPrefix::DontAdd)+toHex(solution.nonce, HexPrefix::DontAdd) << endl;
         //记录nonce 和 mixhash
-        write_string_to_file_append("datain.txt",solution.work.header.hex(HexPrefix::DontAdd)+toHex(solution.nonce, HexPrefix::DontAdd));
-        if(NULL==(fstream=popen("tpm2_sign -k 0x81020003 -P leaf123 -g 0x000B -m secret.data -s signature_data","r")))
+        write_string_to_file_append("secret.data",solution.work.header.hex(HexPrefix::DontAdd)+toHex(solution.nonce, HexPrefix::DontAdd));
+        if(NULL==(fstream=popen("sh sign.sh","r")))
         {
-            fprintf(stderr,"execute command failed: %s",strerror(errno));
+            fprintf(stderr,"sign failed: %s",strerror(errno));
             break;
         }
         //等待文件写结束
@@ -1647,7 +1643,9 @@ void EthStratumClient::submitSolution(const Solution& solution)
             cout << "************************************" << endl;
         }
         pclose(fstream);
+
         signContent = readFileIntoString(signfile);
+        cout << "sign content : " << toHex(signContent,2,HexPrefix::DontAdd) << endl;
         jReq["jsonrpc"] = "2.0";
         jReq["params"].append(m_conn->User());
         jReq["params"].append(solution.work.job);
@@ -1662,17 +1660,12 @@ void EthStratumClient::submitSolution(const Solution& solution)
 
     case EthStratumClient::ETHPROXY:
 
-        // if(NULL==(fstream=popen("rm datain.txt","r")))
-        // {
-        //     fprintf(stderr,"execute command failed: %s",strerror(errno));
-        //     break;
-        // }
         cout << "hash content : " << solution.work.header.hex(HexPrefix::DontAdd)+toHex(solution.nonce, HexPrefix::DontAdd) << endl;
         //记录nonce 和 mixhash
-        write_string_to_file_append("datain.txt",solution.work.header.hex(HexPrefix::Add)+toHex(solution.nonce, HexPrefix::Add));
-        if(NULL==(fstream=popen("rm -f hash.bin ticket.bin signature.bin && tpm2_hash -H e -g 0x00B -I datain.txt -o hash.bin -t ticket.bin && tpm2_sign -k 0x81000005 -P RSAleaf123 -g 0x000B -m datain.txt -s signature.bin -t ticket.bin","r")))
+        write_string_to_file_append("secret.data",solution.work.header.hex(HexPrefix::DontAdd)+toHex(solution.nonce, HexPrefix::DontAdd));
+        if(NULL==(fstream=popen("sh sign.sh","r")))
         {
-            fprintf(stderr,"execute command failed: %s",strerror(errno));
+            fprintf(stderr,"sign failed: %s",strerror(errno));
             break;
         }
         //等待文件写结束
@@ -1699,9 +1692,9 @@ void EthStratumClient::submitSolution(const Solution& solution)
         cout << "hash content : " << solution.work.header.hex(HexPrefix::DontAdd)+toHex(solution.nonce, HexPrefix::DontAdd) << endl;
         //记录nonce 和 mixhash
         write_string_to_file_append("secret.data",solution.work.header.hex(HexPrefix::DontAdd)+toHex(solution.nonce, HexPrefix::DontAdd));
-        if(NULL==(fstream=popen("rm -f signature_data signature.raw && tpm2_sign -k 0x81020004 -P leaf123 -g 0x000B -m secret.data -s signature_data","r")))
+        if(NULL==(fstream=popen("sh sign.sh","r")))
         {
-            fprintf(stderr,"execute command failed: %s",strerror(errno));
+            fprintf(stderr,"sign failed: %s",strerror(errno));
             break;
         }
         //等待文件写结束
@@ -1721,12 +1714,13 @@ void EthStratumClient::submitSolution(const Solution& solution)
         break;
         
     case EthStratumClient::ETHEREUMSTRATUM2:
+
         cout << "hash content : " << solution.work.header.hex(HexPrefix::DontAdd)+toHex(solution.nonce, HexPrefix::DontAdd) << endl;
         //记录nonce 和 mixhash
-        write_string_to_file_append("datain.txt",solution.work.header.hex(HexPrefix::Add)+toHex(solution.nonce, HexPrefix::Add));
-        if(NULL==(fstream=popen("rm -f signature.bin && tpm2_sign -k 0x81020003 -P leaf123 -g 0x000B -m datain.txt -s signature.bin","r")))
+        write_string_to_file_append("secret.data",solution.work.header.hex(HexPrefix::DontAdd)+toHex(solution.nonce, HexPrefix::DontAdd));
+        if(NULL==(fstream=popen("sh sign.sh","r")))
         {
-            fprintf(stderr,"execute command failed: %s",strerror(errno));
+            fprintf(stderr,"sign failed: %s",strerror(errno));
             break;
         }
         //等待文件写结束
