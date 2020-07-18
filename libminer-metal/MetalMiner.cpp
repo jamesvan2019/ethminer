@@ -46,6 +46,9 @@ along with ethminer.  If not, see <http://www.gnu.org/licenses/>.
 #if defined(__APPLE__) || defined(__MACOSX)
 /* MACOSX */
 #include <mach/mach.h>
+#include <IOkit/IOTypes.h>
+#include <IOkit/IOKitLib.h>
+#include <CoreFoundation/CoreFoundation.h>
 #else
 #error "Invalid OS configuration"
 #endif
@@ -53,6 +56,68 @@ along with ethminer.  If not, see <http://www.gnu.org/licenses/>.
 using namespace std;
 using namespace dev;
 using namespace eth;
+
+namespace utils
+{
+template< typename cf_reference_t >
+class scoped_cf_ref
+{
+public:
+    scoped_cf_ref() = default;
+    scoped_cf_ref( cf_reference_t ref_ )
+        : m_ref( ref_ )
+    {}
+
+    ~scoped_cf_ref()
+    {
+        if( m_ref )
+            CFRelease( m_ref );
+    }
+
+    operator cf_reference_t& () { return m_ref; }
+    operator const cf_reference_t& () const { return m_ref; }
+
+    cf_reference_t* operator& () { return &m_ref; }
+
+private:
+    cf_reference_t m_ref;
+};
+
+template<typename property_t>
+inline CFTypeID get_cf_type_id() { return 0; }
+
+template<>
+inline CFTypeID get_cf_type_id< CFStringRef >() { return
+        7; }
+
+template<>
+inline CFTypeID get_cf_type_id< CFDataRef >() { return 20; }
+
+template<>
+inline CFTypeID get_cf_type_id< CFNumberRef >() { return 22; }
+
+template<typename property_t>
+property_t get_property( io_object_t service_, CFStringRef name_ )
+{
+    auto cfref = IORegistryEntryCreateCFProperty( service_, name_, kCFAllocatorDefault, 0 );
+    if( cfref && ( CFGetTypeID( cfref ) == get_cf_type_id< property_t >() ) )
+        return static_cast< property_t >( cfref );
+    return NULL;
+}
+
+boost::optional< io_service_t > get_io_service_by_property( const io_iterator_t& it_, CFStringRef property_, CFStringRef name_ )
+{
+    while ( auto service = IOIteratorNext( it_ ) )
+    {
+        scoped_cf_ref< CFStringRef > ioName = static_cast< CFStringRef >(
+            IORegistryEntryCreateCFProperty( service, property_, kCFAllocatorDefault, 0 )
+        );
+        if ( ioName && CFStringCompare(ioName, name_, 0) == kCFCompareEqualTo )
+            return service;
+    }
+    return boost::none;
+}
+}
 
 /* ######################## Metal Miner ######################## */
 
@@ -221,8 +286,31 @@ void MetalMiner::enumDevices(std::map<string, DeviceDescriptor>& _DevicesCollect
         if (maxWorkingSize > 0)  // metal's maxWorkingSize only works for integrated GPU
         {
             deviceDescriptor.totalMemory = maxWorkingSize;
+        }else{ // For PCI GPU device
+            io_iterator_t iterator;
+            if (IOServiceGetMatchingServices(kIOMasterPortDefault, IOServiceMatching("IOPCIDevice"), &iterator)==0) {
+                while ( auto service = utils::get_io_service_by_property( iterator, CFSTR( "IOName" ), CFSTR("display") ) )
+                {
+                    // use 'model' property as the GPU device's name
+                    utils::scoped_cf_ref< CFDataRef > model = utils::get_property< CFDataRef >( service.value(), CFSTR("model") );
+                    auto _length = CFDataGetLength(model);
+                    std::string _model_name;
+                    _model_name.resize(_length);
+                    CFDataGetBytes(model,CFRangeMake(0,_length), (UInt8*)_model_name.data());
+                    // test if devices' model is match with mtlName.
+                    // TODO, should use more precisely globle property like device id to do the test.
+                    if ( deviceDescriptor.mtlName.find(_model_name) != std::string::npos )
+                    {
+                        utils::scoped_cf_ref<CFNumberRef> memsize =
+                            utils::get_property<CFNumberRef>(service.value(), CFSTR("ATY,memsize"));
+                        if (memsize)
+                            CFNumberGetValue(
+                                memsize, kCFNumberSInt64Type, &deviceDescriptor.totalMemory);
+                        CFRelease(memsize);
+                    }
+                }
+            }
         }
-
         _DevicesCollection[uniqueId] = deviceDescriptor;
     }
 
