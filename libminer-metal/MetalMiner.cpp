@@ -204,12 +204,12 @@ void MetalMiner::enumDevices(std::map<string, DeviceDescriptor>& _DevicesCollect
             deviceDescriptor = DeviceDescriptor();
 
         const ns::String name =  d.GetName();
-        const int size = d.GetCurrentAllocatedSize();
-        const uint size2 = d.GetRecommendedMaxWorkingSetSize();
+        const int currentAllocatedSize = d.GetCurrentAllocatedSize();
+        const uint maxWorkingSize = d.GetRecommendedMaxWorkingSetSize();
 
-        DEV_BUILD_LOG_PROGRAMFLOW(mtllog, "device " << name.GetCStr() << " id=" << uniqueId << " size=" << size
-            << " size2=" << size2
-            );
+        DEV_BUILD_LOG_PROGRAMFLOW(mtllog, "device " << name.GetCStr() << " id=" << uniqueId
+            << " currentAllocatedSize =" <<  currentAllocatedSize
+            << " maxWorkingSize =" << maxWorkingSize);
 
         deviceDescriptor.name = name.GetCStr();
         deviceDescriptor.mtlDetected = true;
@@ -218,6 +218,10 @@ void MetalMiner::enumDevices(std::map<string, DeviceDescriptor>& _DevicesCollect
         deviceDescriptor.mtlDeviceIndex = i;
         deviceDescriptor.mtlDeviceOrdinal = i;
         deviceDescriptor.mtlName = name.GetCStr();
+        if (maxWorkingSize > 0)  // metal's maxWorkingSize only works for integrated GPU
+        {
+            deviceDescriptor.totalMemory = maxWorkingSize;
+        }
 
         _DevicesCollection[uniqueId] = deviceDescriptor;
     }

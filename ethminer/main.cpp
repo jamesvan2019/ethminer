@@ -374,7 +374,7 @@ public:
         bool metal_miner = false;
 #if ETH_METAL
         app.add_flag("-T,--metal", metal_miner, "");
-        app.add_option("--metal-devices,--mt-devices", m_MTLSettings.devices, "");
+        app.add_option("--metal-devices", m_MTLSettings.devices, "");
 #endif
         auto sim_opt = app.add_option("-Z,--simulation,-M,--benchmark", m_PoolSettings.benchmarkBlock, "", true);
 
