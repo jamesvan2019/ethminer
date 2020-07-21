@@ -352,7 +352,7 @@ bool ProgPowCUDAMiner::cuda_init(
 			return false;
 
 		// use selected device
-		m_device_num = _deviceId < numDevices -1 ? _deviceId : numDevices - 1;
+		m_device_num = m_deviceDescriptor.cuDeviceIndex;
 		m_hwmoninfo.deviceType = HwMonitorInfoType::NVIDIA;
 		m_hwmoninfo.indexSource = HwMonitorIndexSource::CUDA;
 		m_hwmoninfo.deviceIndex = m_device_num;
@@ -385,8 +385,11 @@ bool ProgPowCUDAMiner::cuda_init(
 			cudalog << "Resetting device success";
 			CUdevice device;
 			CUcontext context;
+			cudalog << "cuDeviceGet";
 			cuDeviceGet(&device, m_device_num);
+			cudalog << "cuDeviceGet success cuCtxCreate";
 			cuCtxCreate(&context, s_scheduleFlag, device);
+				cudalog << "cuDeviceGet success cuCtxCreate success";
 			//We need to reset the light and the Dag for the following code to reallocate
 			//since cudaDeviceReset() frees all previous allocated memory
 			m_light[m_device_num] = nullptr;
