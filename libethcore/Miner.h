@@ -102,14 +102,6 @@ enum class HwMonitorIndexSource
 	CUDA
 };
 
-struct HwMonitorInfo
-{
-	HwMonitorInfoType deviceType = HwMonitorInfoType::UNKNOWN;
-	HwMonitorIndexSource indexSource = HwMonitorIndexSource::UNKNOWN;
-	int deviceIndex = -1;
-
-};
-
 struct MinerSettings
 {
     vector<unsigned> devices;
@@ -239,6 +231,7 @@ struct DeviceDescriptor
 struct HwMonitorInfo
 {
     HwMonitorInfoType deviceType = HwMonitorInfoType::UNKNOWN;
+	HwMonitorIndexSource indexSource = HwMonitorIndexSource::UNKNOWN;
     string devicePciId;
     int deviceIndex = -1;
 };
