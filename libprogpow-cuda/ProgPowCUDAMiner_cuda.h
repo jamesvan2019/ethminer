@@ -24,7 +24,7 @@ typedef struct {
 typedef struct
 {
 	uint4 uint4s[32 / sizeof(uint4)];
-} hash32_t;
+} progpow_hash32_t;
 
 typedef struct
 {

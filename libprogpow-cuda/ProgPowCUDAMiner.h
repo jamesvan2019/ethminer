@@ -40,7 +40,7 @@ class CUMinerFactory
         Miner* GetCUMinerIntance(unsigned _index, PowType _powType, CUSettings _settings, DeviceDescriptor& _device);
 };
 
-class ProgPowCUDAMiner: public Miner
+class ProgPowCUDAMiner: public CUDAMiner
 {
 
 public:
@@ -109,9 +109,6 @@ public:
 
 protected:
 	void kick_miner() override;
-	bool initDevice() override;
-
-    bool initEpoch_internal() override;
 
 private:
 	atomic<bool> m_new_work = {false};
