@@ -28,7 +28,7 @@ using namespace dev;
 using namespace eth;
 
 unsigned ProgPowCUDAMiner::s_numInstances = 0;
-
+vector<int> CUDAMiner::s_devices(MAX_MINERS, -1);
 struct CUDAChannel: public LogChannel
 {
 	static const char* name() { return EthOrange " cu"; }
@@ -103,6 +103,7 @@ uint64_t get_start_nonce(uint64_t _index)
     return Farm::f().get_nonce_scrambler() + ((uint64_t) _index << 40);
 };
 #define LOG2_MAX_MINERS 5u
+#define MAX_MINERS (1u << LOG2_MAX_MINERS)
 void ProgPowCUDAMiner::workLoop()
 {
 	WorkPackage current;
@@ -176,8 +177,8 @@ void ProgPowCUDAMiner::setNumInstances(unsigned _instances)
 
 void ProgPowCUDAMiner::setDevices(const vector<unsigned>& _devices, unsigned _selectedDeviceCount)
 {
-        // for (unsigned i = 0; i < _selectedDeviceCount; i++)
-        //         s_devices[i] = _devices[i];
+        for (unsigned i = 0; i < _selectedDeviceCount; i++)
+                s_devices[i] = _devices[i];
 }
 
 unsigned ProgPowCUDAMiner::getNumDevices()
@@ -241,20 +242,20 @@ bool ProgPowCUDAMiner::configureGPU(
 	s_dagCreateDevice = _dagCreateDevice;
 	s_exit  = _exit;
 
-	// if (!cuda_configureGPU(
-	// 	getNumDevices(),
-	// 	s_devices,
-	// 	((_blockSize + 7) / 8) * 8,
-	// 	_gridSize,
-	// 	_numStreams,
-	// 	_scheduleFlag,
-	// 	_currentBlock,
-	// 	_noeval)
-	// 	)
-	// {
-	// 	cout << "No CUDA device with sufficient memory was found. Can't CUDA mine. Remove the -U argument" << endl;
-	// 	return false;
-	// }
+	if (!cuda_configureGPU(
+		getNumDevices(),
+		s_devices,
+		((_blockSize + 7) / 8) * 8,
+		_gridSize,
+		_numStreams,
+		_scheduleFlag,
+		_currentBlock,
+		_noeval)
+		)
+	{
+		cout << "No CUDA device with sufficient memory was found. Can't CUDA mine. Remove the -U argument" << endl;
+		return false;
+	}
 	return true;
 }
 
