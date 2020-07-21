@@ -64,10 +64,10 @@ bool ProgPowCUDAMiner::init(int epoch)
 {
 	try {
 		if (s_dagLoadMode == DAG_LOAD_MODE_SEQUENTIAL)
-			while (s_dagLoadIndex < index)
+			while (s_dagLoadIndex < m_index)
 				this_thread::sleep_for(chrono::milliseconds(100));
 		unsigned device = m_deviceDescriptor.cuDeviceIndex;
-		cnote << "Initialising miner " << index;
+		cnote << "Initialising miner " << m_index;
 
 		ProgPowAux::LightType light;
 		light = ProgPowAux::light(epoch);
@@ -142,7 +142,7 @@ void ProgPowCUDAMiner::workLoop()
 			if (current.exSizeBytes >= 0)
 			{
 				// this can support up to 2^c_log2Max_miners devices
-				startN = current.startNonce | ((uint64_t)index << (64 - LOG2_MAX_MINERS - current.exSizeBytes));
+				startN = current.startNonce | ((uint64_t)m_index << (64 - LOG2_MAX_MINERS - current.exSizeBytes));
 			}
 			search(current.header.data(), upper64OfBoundary, (current.exSizeBytes >= 0), startN, w);
 		}
