@@ -55,10 +55,10 @@ void ethash_generate_dag(
 	int device
 	);
 
-struct progpow_cuda_runtime_error : public virtual std::runtime_error
-{
-	cuda_runtime_error( std::string msg ) : std::runtime_error(msg) {}
-};
+// struct progpow_cuda_runtime_error : public virtual std::runtime_error
+// {
+// 	cuda_runtime_error( std::string msg ) : std::runtime_error(msg) {}
+// };
 
 #define PROGPOW_CUDA_SAFE_CALL(call)				\
 do {							\
