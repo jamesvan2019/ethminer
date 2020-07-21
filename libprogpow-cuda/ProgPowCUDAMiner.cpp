@@ -405,8 +405,8 @@ bool ProgPowCUDAMiner::cuda_init(
 			m_dag = nullptr; 
 		}
 		// create buffer for cache
-		hash64_t * dag = m_dag;
-		hash64_t * light = m_light[m_device_num];
+		progpow_hash64_t * dag = m_dag;
+		progpow_hash64_t * light = m_light[m_device_num];
 
 		if(!light){ 
 			cudalog << "Allocating light with size: " << _lightBytes;
@@ -429,7 +429,7 @@ bool ProgPowCUDAMiner::cuda_init(
 				PROGPOW_CUDA_SAFE_CALL(cudaStreamCreate(&m_streams[i]));
 			}
 			
-			memset(&m_current_header, 0, sizeof(hash32_t));
+			memset(&m_current_header, 0, sizeof(progpow_hash32_t));
 			m_current_target = 0;
 			m_current_nonce = 0;
 			m_current_index = 0;
@@ -586,9 +586,9 @@ void ProgPowCUDAMiner::search(
 	const dev::eth::WorkPackage& w)
 {
 	bool initialize = false;
-	if (memcmp(&m_current_header, header, sizeof(hash32_t)))
+	if (memcmp(&m_current_header, header, sizeof(progpow_hash32_t)))
 	{
-		m_current_header = *reinterpret_cast<hash32_t const *>(header);
+		m_current_header = *reinterpret_cast<progpow_hash32_t const *>(header);
 		initialize = true;
 	}
 	if (m_current_target != target)
