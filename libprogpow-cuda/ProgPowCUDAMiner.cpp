@@ -166,7 +166,7 @@ void ProgPowCUDAMiner::workLoop()
 		// Reset miner and stop working
 		PROGPOW_CUDA_SAFE_CALL(cudaDeviceReset());
 	}
-	catch (cuda_runtime_error const& _e)
+	catch (progpow_cuda_runtime_error const& _e)
 	{
 		cwarn << "Fatal GPU error: " << _e.what();
 		cwarn << "Terminating.";
@@ -327,7 +327,7 @@ bool ProgPowCUDAMiner::cuda_configureGPU(
 		}
 		return true;
 	}
-	catch (cuda_runtime_error const& _e)
+	catch (progpow_cuda_runtime_error const& _e)
 	{
 		cwarn << "Fatal GPU error: " << _e.what();
 		cwarn << "Terminating.";
@@ -470,7 +470,7 @@ cpyDag:
 
 		return true;
 	}
-	catch (cuda_runtime_error const& _e)
+	catch (progpow_cuda_runtime_error const& _e)
 	{
 		cwarn << "Fatal GPU error: " << _e.what();
 		cwarn << "Terminating.";

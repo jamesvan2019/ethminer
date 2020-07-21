@@ -55,10 +55,10 @@ void ethash_generate_dag(
 	int device
 	);
 
-// struct progpow_cuda_runtime_error : public virtual std::runtime_error
-// {
-// 	cuda_runtime_error( std::string msg ) : std::runtime_error(msg) {}
-// };
+struct progpow_cuda_runtime_error : public virtual std::runtime_error
+{
+	progpow_cuda_runtime_error( std::string msg ) : std::runtime_error(msg) {}
+};
 
 #define PROGPOW_CUDA_SAFE_CALL(call)				\
 do {							\
@@ -71,7 +71,7 @@ do {							\
 			<< __LINE__			\
 			<< " calling " #call " failed with error "     \
 			<< cudaGetErrorString(result);	\
-		throw cuda_runtime_error(ss.str());	\
+		throw progpow_cuda_runtime_error(ss.str());	\
 	}						\
 } while (0)
 
@@ -88,7 +88,7 @@ do {													\
 			<< __LINE__									\
 			<< " calling " #call " failed with error "  \
 			<< msg;										\
-		throw cuda_runtime_error(ss.str());				\
+		throw progpow_cuda_runtime_error(ss.str());				\
 	}													\
 } while (0)
 
@@ -103,6 +103,6 @@ do {                                                    \
 			<< __LINE__									\
 			<< " calling " #call " failed with error "  \
             << nvrtcGetErrorString(result) << '\n';     \
-		throw cuda_runtime_error(ss.str());				\
+		throw progpow_cuda_runtime_error(ss.str());				\
     }                                                   \
 } while(0)
