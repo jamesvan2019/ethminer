@@ -27,8 +27,11 @@ using namespace std;
 using namespace dev;
 using namespace eth;
 
+#define LOG2_MAX_MINERS 5u
+#define MAX_MINERS (1u << LOG2_MAX_MINERS)
+
 unsigned ProgPowCUDAMiner::s_numInstances = 0;
-vector<int> CUDAMiner::s_devices(MAX_MINERS, -1);
+vector<int> ProgPowCUDAMiner::s_devices(MAX_MINERS, -1);
 struct CUDAChannel: public LogChannel
 {
 	static const char* name() { return EthOrange " cu"; }
@@ -102,8 +105,7 @@ uint64_t get_start_nonce(uint64_t _index)
     // Each GPU is given a non-overlapping 2^40 range to search
     return Farm::f().get_nonce_scrambler() + ((uint64_t) _index << 40);
 };
-#define LOG2_MAX_MINERS 5u
-#define MAX_MINERS (1u << LOG2_MAX_MINERS)
+
 void ProgPowCUDAMiner::workLoop()
 {
 	WorkPackage current;
