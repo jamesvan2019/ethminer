@@ -164,7 +164,7 @@ void ProgPowCUDAMiner::workLoop()
 		}
 
 		// Reset miner and stop working
-		CUDA_SAFE_CALL(cudaDeviceReset());
+		PROGPOW_CUDA_SAFE_CALL(cudaDeviceReset());
 	}
 	catch (cuda_runtime_error const& _e)
 	{
@@ -224,7 +224,7 @@ void ProgPowCUDAMiner::listDevices()
 		for (int i = 0; i < numDevices; ++i)
 		{
 			cudaDeviceProp props;
-			CUDA_SAFE_CALL(cudaGetDeviceProperties(&props, i));
+			PROGPOW_CUDA_SAFE_CALL(cudaGetDeviceProperties(&props, i));
 
 			cout << "[" + to_string(i) + "] " + string(props.name) + "\n";
 			cout << "\tCompute version: " + to_string(props.major) + "." + to_string(props.minor) + "\n";
@@ -313,7 +313,7 @@ bool ProgPowCUDAMiner::cuda_configureGPU(
 			{
 				int deviceId = min(devicesCount - 1, _devices[i]);
 				cudaDeviceProp props;
-				CUDA_SAFE_CALL(cudaGetDeviceProperties(&props, deviceId));
+				PROGPOW_CUDA_SAFE_CALL(cudaGetDeviceProperties(&props, deviceId));
 				if (props.totalGlobalMem >= dagSize)
 				{
 					cudalog <<  "Found suitable CUDA device [" << string(props.name) << "] with " << props.totalGlobalMem << " bytes of GPU memory";
@@ -371,7 +371,7 @@ bool ProgPowCUDAMiner::cuda_init(
 		m_hwmoninfo.deviceIndex = m_device_num;
 
 		cudaDeviceProp device_props;
-		CUDA_SAFE_CALL(cudaGetDeviceProperties(&device_props, m_device_num));
+		PROGPOW_CUDA_SAFE_CALL(cudaGetDeviceProperties(&device_props, m_device_num));
 
 		cudalog << "Using device: " << device_props.name << " (Compute " + to_string(device_props.major) + "." + to_string(device_props.minor) + ")";
 
@@ -382,7 +382,7 @@ bool ProgPowCUDAMiner::cuda_init(
 		uint32_t dagElms   = (unsigned)(dagBytes / (PROGPOW_LANES * PROGPOW_DAG_LOADS * 4));
 		uint32_t lightWords = (unsigned)(_lightBytes / sizeof(node));
 
-		CUDA_SAFE_CALL(cudaSetDevice(m_device_num));
+		PROGPOW_CUDA_SAFE_CALL(cudaSetDevice(m_device_num));
 		cudalog << "Set Device to current";
 		if(dagElms != m_dag_elms || !m_dag)
 		{
@@ -394,7 +394,7 @@ bool ProgPowCUDAMiner::cuda_init(
 			}
 			//We need to reset the device and recreate the dag  
 			cudalog << "Resetting device";
-			CUDA_SAFE_CALL(cudaDeviceReset());
+			PROGPOW_CUDA_SAFE_CALL(cudaDeviceReset());
 			CUdevice device;
 			CUcontext context;
 			cuDeviceGet(&device, m_device_num);
@@ -410,14 +410,14 @@ bool ProgPowCUDAMiner::cuda_init(
 
 		if(!light){ 
 			cudalog << "Allocating light with size: " << _lightBytes;
-			CUDA_SAFE_CALL(cudaMalloc(reinterpret_cast<void**>(&light), _lightBytes));
+			PROGPOW_CUDA_SAFE_CALL(cudaMalloc(reinterpret_cast<void**>(&light), _lightBytes));
 		}
 		// copy lightData to device
-		CUDA_SAFE_CALL(cudaMemcpy(reinterpret_cast<void*>(light), _lightData, _lightBytes, cudaMemcpyHostToDevice));
+		PROGPOW_CUDA_SAFE_CALL(cudaMemcpy(reinterpret_cast<void*>(light), _lightData, _lightBytes, cudaMemcpyHostToDevice));
 		m_light[m_device_num] = light;
 		
 		if(dagElms != m_dag_elms || !dag) // create buffer for dag
-			CUDA_SAFE_CALL(cudaMalloc(reinterpret_cast<void**>(&dag), dagBytes));
+			PROGPOW_CUDA_SAFE_CALL(cudaMalloc(reinterpret_cast<void**>(&dag), dagBytes));
 		
 		if(dagElms != m_dag_elms || !dag)
 		{
@@ -425,8 +425,8 @@ bool ProgPowCUDAMiner::cuda_init(
 			cudalog << "Generating mining buffers";
 			for (unsigned i = 0; i != s_numStreams; ++i)
 			{
-				CUDA_SAFE_CALL(cudaMallocHost(&m_search_buf[i], sizeof(search_results)));
-				CUDA_SAFE_CALL(cudaStreamCreate(&m_streams[i]));
+				PROGPOW_CUDA_SAFE_CALL(cudaMallocHost(&m_search_buf[i], sizeof(search_results)));
+				PROGPOW_CUDA_SAFE_CALL(cudaStreamCreate(&m_streams[i]));
 			}
 			
 			memset(&m_current_header, 0, sizeof(hash32_t));
@@ -446,7 +446,7 @@ bool ProgPowCUDAMiner::cuda_init(
 					{
 						uint8_t* memoryDAG = new uint8_t[dagBytes];
 						cudalog << "Copying DAG from GPU #" << m_device_num << " to host";
-						CUDA_SAFE_CALL(cudaMemcpy(reinterpret_cast<void*>(memoryDAG), dag, dagBytes, cudaMemcpyDeviceToHost));
+						PROGPOW_CUDA_SAFE_CALL(cudaMemcpy(reinterpret_cast<void*>(memoryDAG), dag, dagBytes, cudaMemcpyDeviceToHost));
 
 						hostDAG = memoryDAG;
 					}
@@ -461,7 +461,7 @@ bool ProgPowCUDAMiner::cuda_init(
 cpyDag:
 				cudalog << "Copying DAG from host to GPU #" << m_device_num;
 				const void* hdag = (const void*)hostDAG;
-				CUDA_SAFE_CALL(cudaMemcpy(reinterpret_cast<void*>(dag), hdag, dagBytes, cudaMemcpyHostToDevice));
+				PROGPOW_CUDA_SAFE_CALL(cudaMemcpy(reinterpret_cast<void*>(dag), hdag, dagBytes, cudaMemcpyHostToDevice));
 			}
 		}
     
@@ -522,7 +522,7 @@ void ProgPowCUDAMiner::compileKernel(
 
 	NVRTC_SAFE_CALL(nvrtcAddNameExpression(prog, name));
 	cudaDeviceProp device_props;
-	CUDA_SAFE_CALL(cudaGetDeviceProperties(&device_props, m_device_num));
+	PROGPOW_CUDA_SAFE_CALL(cudaGetDeviceProperties(&device_props, m_device_num));
 	std::string op_arch = "--gpu-architecture=compute_" + to_string(device_props.major) + to_string(device_props.minor);
 	std::string op_dag = "-DPROGPOW_DAG_ELEMENTS=" + to_string(dag_elms);
 
@@ -610,7 +610,7 @@ void ProgPowCUDAMiner::search(
 		{
 			m_starting_nonce = 0;
 			m_current_index = 0;
-			CUDA_SAFE_CALL(cudaDeviceSynchronize());
+			PROGPOW_CUDA_SAFE_CALL(cudaDeviceSynchronize());
 			for (unsigned int i = 0; i < s_numStreams; i++)
 				m_search_buf[i]->count = 0;
 		}
@@ -627,7 +627,7 @@ void ProgPowCUDAMiner::search(
 		{
 			m_current_nonce = get_start_nonce(m_index);
 			m_current_index = 0;
-			CUDA_SAFE_CALL(cudaDeviceSynchronize());
+			PROGPOW_CUDA_SAFE_CALL(cudaDeviceSynchronize());
 			for (unsigned int i = 0; i < s_numStreams; i++)
 				m_search_buf[i]->count = 0;
 		}
@@ -646,7 +646,7 @@ void ProgPowCUDAMiner::search(
 		uint64_t nonce_base = m_current_nonce - s_numStreams * batch_size;
 		if (m_current_index >= s_numStreams)
 		{
-			CUDA_SAFE_CALL(cudaStreamSynchronize(stream));
+			PROGPOW_CUDA_SAFE_CALL(cudaStreamSynchronize(stream));
 			found_count = buffer->count;
 			if (found_count) {
 				buffer->count = 0;

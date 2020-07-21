@@ -167,7 +167,7 @@ void ethash_generate_dag(
 	for (uint32_t i = 0; i < fullRuns; i++)
 	{
 		ethash_calculate_dag_item <<<blocks, threads, 0, stream >>>(i * blocks * threads, dag, dag_bytes, light, light_words);
-		CUDA_SAFE_CALL(cudaDeviceSynchronize());
+		PROGPOW_CUDA_SAFE_CALL(cudaDeviceSynchronize());
 	}
-	CUDA_SAFE_CALL(cudaGetLastError());
+	PROGPOW_CUDA_SAFE_CALL(cudaGetLastError());
 }
