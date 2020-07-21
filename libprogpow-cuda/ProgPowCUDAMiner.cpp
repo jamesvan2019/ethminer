@@ -122,7 +122,7 @@ void ProgPowCUDAMiner::workLoop()
 				if(!w || w.header == h256())
 				{
 					cnote << "No work.";
-					//std::this_thread::sleep_for(std::chrono::seconds(3));
+					std::this_thread::sleep_for(std::chrono::seconds(3));
 					continue;
 				}
 				if (current.epoch != w.epoch)
