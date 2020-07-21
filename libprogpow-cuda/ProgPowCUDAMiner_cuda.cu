@@ -95,14 +95,14 @@ __device__ uint4 fnv4(uint4 a, uint4 b)
 #define NODE_WORDS (LEGACY_ETHASH_HASH_BYTES/sizeof(uint32_t))
 
 __global__ void
-ethash_calculate_dag_item(uint32_t start, hash64_t *g_dag, uint64_t dag_bytes, hash64_t* g_light, uint32_t light_words)
+ethash_calculate_dag_item(uint32_t start, progpow_hash64_t *g_dag, uint64_t dag_bytes, progpow_hash64_t* g_light, uint32_t light_words)
 {
 	uint64_t const node_index = start + uint64_t(blockIdx.x) * blockDim.x + threadIdx.x;
-	uint64_t num_nodes = dag_bytes / sizeof(hash64_t);
+	uint64_t num_nodes = dag_bytes / sizeof(progpow_hash64_t);
 	uint64_t num_nodes_rounded = ((num_nodes + 3) / 4) * 4;
 	if (node_index >= num_nodes_rounded) return; // None of the threads from this quad have valid node_index
 
-	hash200_t dag_node;
+	progpow_hash200_t dag_node;
 	for(int i=0; i<4; i++)
 		dag_node.uint4s[i] = g_light[node_index % light_words].uint4s[i];
 	dag_node.words[0] ^= node_index;
@@ -143,15 +143,15 @@ ethash_calculate_dag_item(uint32_t start, hash64_t *g_dag, uint64_t dag_bytes, h
 							  __shfl_sync(0xFFFFFFFF,dag_node.uint4s[w].z, t, 4),
 							  __shfl_sync(0xFFFFFFFF,dag_node.uint4s[w].w, t, 4));
 		}
-		if(shuffle_index*sizeof(hash64_t) < dag_bytes)
+		if(shuffle_index*sizeof(progpow_hash64_t) < dag_bytes)
 			g_dag[shuffle_index].uint4s[thread_id] = s[thread_id];
 	}
 }
 
 void ethash_generate_dag(
-	hash64_t* dag,
+	progpow_hash64_t* dag,
 	uint64_t dag_bytes,
-	hash64_t * light,
+	progpow_hash64_t * light,
 	uint32_t light_words,
 	uint32_t blocks,
 	uint32_t threads,
@@ -159,7 +159,7 @@ void ethash_generate_dag(
 	int device
 	)
 {
-	uint64_t const work = dag_bytes / sizeof(hash64_t);
+	uint64_t const work = dag_bytes / sizeof(progpow_hash64_t);
 
 	uint32_t fullRuns = (uint32_t)(work / (blocks * threads));
 	uint32_t const restWork = (uint32_t)(work % (blocks * threads));
