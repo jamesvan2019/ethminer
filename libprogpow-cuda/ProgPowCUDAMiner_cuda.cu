@@ -148,7 +148,7 @@ ethash_calculate_dag_item(uint32_t start, progpow_hash64_t *g_dag, uint64_t dag_
 	}
 }
 
-void ethash_generate_dag(
+void progpow_generate_dag(
 	progpow_hash64_t* dag,
 	uint64_t dag_bytes,
 	progpow_hash64_t * light,

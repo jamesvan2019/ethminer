@@ -439,7 +439,7 @@ bool ProgPowCUDAMiner::cuda_init(
 				if((m_device_num == dagCreateDevice) || !_cpyToHost){ //if !cpyToHost -> All devices shall generate their DAG
 					cudalog << "Generating DAG for GPU #" << m_device_num <<
 							   " with dagBytes: " << dagBytes <<" gridSize: " << s_gridSize;
-					ethash_generate_dag(dag, dagBytes, light, lightWords, s_gridSize, s_blockSize, m_streams[0], m_device_num);
+					progpow_generate_dag(dag, dagBytes, light, lightWords, s_gridSize, s_blockSize, m_streams[0], m_device_num);
 					cudalog << "Finished DAG";
 
 					if (_cpyToHost)
@@ -484,15 +484,7 @@ cpyDag:
 		return false;
 	}
 }
-bool ProgPowCUDAMiner::initDevice()
-{
-    return true;
-}
 
-bool ProgPowCUDAMiner::initEpoch_internal()
-{
-    return true;
-}
 #include <iostream>
 #include <fstream>
 

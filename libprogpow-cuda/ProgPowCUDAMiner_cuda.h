@@ -44,7 +44,7 @@ typedef union {
 	uint4	 uint4s[200 / sizeof(uint4)];
 } progpow_hash200_t;
 
-void ethash_generate_dag(
+void progpow_generate_dag(
 	progpow_hash64_t* dag,
 	uint64_t dag_bytes,
 	progpow_hash64_t * light,
