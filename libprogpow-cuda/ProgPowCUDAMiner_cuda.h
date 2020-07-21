@@ -45,9 +45,9 @@ typedef union {
 } progpow_hash200_t;
 
 void ethash_generate_dag(
-	hash64_t* dag,
+	progpow_hash64_t* dag,
 	uint64_t dag_bytes,
-	hash64_t * light,
+	progpow_hash64_t * light,
 	uint32_t light_words,
 	uint32_t blocks,
 	uint32_t threads,
