@@ -53,7 +53,7 @@ const size_t index = 0;
 ProgPowCUDAMiner::ProgPowCUDAMiner(unsigned _index,CUSettings _settings, DeviceDescriptor& _device) :
 	CUDAMiner(_index, _settings, _device)
 	{
-		m_light(getNumDevices())
+		m_light(getNumDevices());
 		cudalog << "ProgPow Miner :" << _index << "init";
 	}
 
