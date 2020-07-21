@@ -29,6 +29,13 @@ namespace dev
 {
 namespace eth
 {
+
+class CUMinerFactory
+{
+    public:
+        Miner* GetCUMinerIntance(unsigned _index, PowType _powType, CUSettings _settings, DeviceDescriptor& _device);
+};
+
 class CUDAMiner : public Miner
 {
 public:

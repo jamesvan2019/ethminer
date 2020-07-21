@@ -47,22 +47,6 @@ struct CUDASwitchChannel: public LogChannel
 #define cudaswitchlog clog(CUDASwitchChannel)
 const size_t index = 0;
 
-
-Miner* CUMinerFactory::GetCUMinerIntance(unsigned int _index, PowType _powType, CUSettings _settings, DeviceDescriptor &_device) {
-        Miner* miner = nullptr;
-        if (_powType == PowType::Ethash)
-        {
-            miner = new CUDAMiner(_index, _settings, _device);
-        }else if (_powType == PowType::ProgPOW)
-        {
-            miner = new ProgPowCUDAMiner(_index, _settings, _device);
-        }else
-        {
-            cudalog << "Unrecognized Pow Type";
-        }
-        return miner;
-}
-
 ProgPowCUDAMiner::ProgPowCUDAMiner(unsigned _index,CUSettings _settings, DeviceDescriptor& _device) :
 	CUDAMiner(_index, _settings, _device)
 	{

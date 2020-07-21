@@ -23,7 +23,7 @@
 #endif
 
 #if ETH_ETHASHCUDA
-#include <libprogpow-cuda/ProgPowCUDAMiner.h>
+#include <libethash-cuda/CUDAMiner.h>
 #endif
 
 #if ETH_METAL
