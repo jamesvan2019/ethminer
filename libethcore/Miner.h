@@ -446,6 +446,7 @@ public:
     float RetrieveHashRate() noexcept;
 
     void TriggerHashRateUpdate() noexcept;
+    std::chrono::high_resolution_clock::time_point workSwitchStart;
 
 protected:
     /**

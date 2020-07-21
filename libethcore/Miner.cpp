@@ -43,7 +43,7 @@ void Miner::setWork(WorkPackage const& _work)
     {
 
         boost::mutex::scoped_lock l(x_work);
-
+        workSwitchStart = std::chrono::high_resolution_clock::now();
         // Void work if this miner is paused
         if (paused())
             m_work.header = h256();
