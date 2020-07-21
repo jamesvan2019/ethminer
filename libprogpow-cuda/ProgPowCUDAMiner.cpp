@@ -368,7 +368,7 @@ bool ProgPowCUDAMiner::cuda_init(
 		uint32_t lightWords = (unsigned)(_lightBytes / sizeof(node));
 
 		PROGPOW_CUDA_SAFE_CALL(cudaSetDevice(m_device_num));
-		cudalog << "Set Device to current";
+		cudalog << "Set Device to current" << m_device_num;
 		if(dagElms != m_dag_elms || !m_dag)
 		{
 			//Check whether the current device has sufficient memory every time we recreate the dag
@@ -380,6 +380,7 @@ bool ProgPowCUDAMiner::cuda_init(
 			//We need to reset the device and recreate the dag  
 			cudalog << "Resetting device";
 			PROGPOW_CUDA_SAFE_CALL(cudaDeviceReset());
+			cudalog << "Resetting device success";
 			CUdevice device;
 			CUcontext context;
 			cuDeviceGet(&device, m_device_num);
