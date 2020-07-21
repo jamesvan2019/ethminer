@@ -114,15 +114,15 @@ private:
 
 	bool init(int epoch);
 
-	hash32_t m_current_header;
+	progpow_hash32_t m_current_header;
 	uint64_t m_current_target;
 	uint64_t m_current_nonce;
 	uint64_t m_starting_nonce;
 	uint64_t m_current_index;
 
 	///Constants on GPU
-	hash64_t* m_dag = nullptr;
-	std::vector<hash64_t*> m_light;
+	progpow_hash64_t* m_dag = nullptr;
+	std::vector<progpow_hash64_t*> m_light;
 	uint32_t m_dag_elms = -1;
 	uint32_t m_device_num;
 
