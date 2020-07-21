@@ -53,6 +53,7 @@ const size_t index = 0;
 ProgPowCUDAMiner::ProgPowCUDAMiner(unsigned _index,CUSettings _settings, DeviceDescriptor& _device) :
 	CUDAMiner(_index, _settings, _device)
 	{
+		m_light(getNumDevices())
 		cudalog << "ProgPow Miner :" << _index << "init";
 	}
 
@@ -382,14 +383,13 @@ bool ProgPowCUDAMiner::cuda_init(
 			//We need to reset the device and recreate the dag  
 			cudalog << "Resetting device";
 			PROGPOW_CUDA_SAFE_CALL(cudaDeviceReset());
-			cudalog << "Resetting device success";
+
 			CUdevice device;
 			CUcontext context;
-			cudalog << "cuDeviceGet";
+
 			cuDeviceGet(&device, m_device_num);
-			cudalog << "cuDeviceGet success cuCtxCreate";
+
 			cuCtxCreate(&context, s_scheduleFlag, device);
-				cudalog << "cuDeviceGet success cuCtxCreate success";
 			//We need to reset the light and the Dag for the following code to reallocate
 			//since cudaDeviceReset() frees all previous allocated memory
 			m_light[m_device_num] = nullptr;
@@ -398,7 +398,7 @@ bool ProgPowCUDAMiner::cuda_init(
 		// create buffer for cache
 		progpow_hash64_t * dag = m_dag;
 		progpow_hash64_t * light = m_light[m_device_num];
-
+		cudalog << "Allocating light";
 		if(!light){ 
 			cudalog << "Allocating light with size: " << _lightBytes;
 			PROGPOW_CUDA_SAFE_CALL(cudaMalloc(reinterpret_cast<void**>(&light), _lightBytes));
