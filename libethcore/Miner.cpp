@@ -25,6 +25,11 @@ namespace eth
 unsigned Miner::s_dagLoadMode = 0;
 unsigned Miner::s_dagLoadIndex = 0;
 unsigned Miner::s_minersCount = 0;
+unsigned dev::eth::Miner::s_dagCreateDevice = 0;
+
+uint8_t* dev::eth::Miner::s_dagInHostMemory = NULL;
+
+bool dev::eth::Miner::s_exit = false;
 
 FarmFace* FarmFace::m_this = nullptr;
 

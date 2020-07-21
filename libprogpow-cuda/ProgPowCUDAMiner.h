@@ -46,9 +46,6 @@ class ProgPowCUDAMiner: public CUDAMiner
 public:
 	ProgPowCUDAMiner(unsigned _index, CUSettings _settings, DeviceDescriptor& _device);
 	~ProgPowCUDAMiner() override;
-	CUSettings m_settings;
-	const uint32_t m_batch_size;
-    const uint32_t m_streams_batch_size;
 	static unsigned instances()
 	{
 		return s_numInstances > 0 ? s_numInstances : 1;
